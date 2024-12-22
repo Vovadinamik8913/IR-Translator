@@ -1,4 +1,4 @@
-package ru.ir.translator.model.service;
+package ru.ir.translator.view.service;
 
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
