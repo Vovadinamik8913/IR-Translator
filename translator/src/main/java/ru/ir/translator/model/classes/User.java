@@ -37,4 +37,8 @@ public class User {
         this.email = email;
     }
 
+    public String getPassword() {
+        return new String(password);
+    }
+
 }

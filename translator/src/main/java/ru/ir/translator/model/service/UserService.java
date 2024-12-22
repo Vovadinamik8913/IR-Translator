@@ -1,5 +1,6 @@
 package ru.ir.translator.model.service;
 
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import ru.ir.translator.model.classes.User;
 import ru.ir.translator.model.repository.UserRepository;
@@ -12,6 +13,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Nullable
     public User get(String login, String password) {
         User user = userRepository.findByLogin(login).orElse(null);
         if (user != null && user.getPassword().equals(password)) {

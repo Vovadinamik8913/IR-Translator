@@ -21,4 +21,34 @@ public class Project {
     private List<Code> code;
     @OneToMany(mappedBy = "project")
     private List<Representation> representation;
+
+    public Project() {}
+    public Project(String name, User user) {
+        this.name = name;
+        this.user = user;
+    }
+
+    public void addCode(Code code) {
+        if (this.code != null) {
+            this.code.add(code);
+        }
+    }
+
+    public void removeCode(Code code) {
+        if (this.code != null) {
+            this.code.remove(code);
+        }
+    }
+
+    public void addRepresentation(Representation representation) {
+        if (this.representation != null) {
+            this.representation.add(representation);
+        }
+    }
+
+    public void removeRepresentation(Representation representation) {
+        if (this.representation != null) {
+            this.representation.remove(representation);
+        }
+    }
 }

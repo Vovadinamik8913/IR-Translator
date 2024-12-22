@@ -19,4 +19,12 @@ public abstract class File {
     private Compiler compiler;
     @ManyToOne @JoinColumn(name = "project_id")
     private Project project;
+
+    public File() {}
+    public File(String name, String path, Compiler compiler, Project project) {
+        this.name = name;
+        this.path = path;
+        this.compiler = compiler;
+        this.project = project;
+    }
 }

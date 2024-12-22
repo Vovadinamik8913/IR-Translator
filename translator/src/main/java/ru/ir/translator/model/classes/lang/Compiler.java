@@ -21,10 +21,6 @@ public class Compiler {
     )
     private List<Language> language;
 
-    @ManyToMany @JoinTable(
-            name = "compiler_representation", // Имя промежуточной таблицы
-            joinColumns = @JoinColumn(name = "lllang_id"), // Внешний ключ для Language
-            inverseJoinColumns = @JoinColumn(name = "compiler_id") // Внешний ключ для Compiler
-    )
-    private List<LLLanguage> LLLanguage;
+    @OneToMany(mappedBy = "compiler")
+    private List<CompilerRepresentation> compilerRepresentations;
 }
