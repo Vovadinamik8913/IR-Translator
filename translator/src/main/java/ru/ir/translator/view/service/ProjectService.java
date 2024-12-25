@@ -1,6 +1,7 @@
 package ru.ir.translator.view.service;
 
 import jakarta.annotation.Nullable;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.ir.translator.model.classes.Project;
@@ -21,8 +22,8 @@ public class ProjectService {
     private final CodeRepository codeRepository;
     private final RepresentationRepository representationRepository;
 
-    public void createProject(Project project) {
-        projectRepository.save(project);
+    public Project createProject(Project project) {
+        return projectRepository.save(project);
     }
 
     public void addCode(Code code) {
@@ -35,8 +36,8 @@ public class ProjectService {
 
 
     @Nullable
-    public Project getProject(User user) {
-        return projectRepository.findByUser(user).orElse(null);
+    public Project getProject(User user, String projectName) {
+        return projectRepository.findByUserAndName(user, projectName).orElse(null);
     }
 
     public List<Project> getProjects(User user) {
@@ -61,13 +62,9 @@ public class ProjectService {
         return representationRepository.findAllByProject(project).orElse(new ArrayList<>());
     }
 
-    public void deleteById(long id) {
-        Project project = projectRepository.findById(id).orElse(null);
-        if (project != null) {
-            codeRepository.deleteAll(project.getCode());
-            representationRepository.deleteAll(project.getRepresentation());
-            projectRepository.delete(project);
-        }
+    @Transactional
+    public void deleteProject(User user, String name) {
+        projectRepository.deleteByUserAndName(user, name);
     }
 
     public void deleteCode(Code code) {

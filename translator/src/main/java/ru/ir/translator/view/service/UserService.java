@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import ru.ir.translator.model.classes.User;
 import ru.ir.translator.model.repository.UserRepository;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -30,6 +32,12 @@ public class UserService {
         }
         return null;
     }
+
+    @Nullable
+    public User get(UUID id) {
+        return userRepository.findByUuid(id).orElse(null);
+    }
+
 
     public void update(User user) {
         userRepository.save(user);

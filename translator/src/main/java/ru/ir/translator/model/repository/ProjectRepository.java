@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
-    Optional<Project> findByUser(User user);
+    Optional<Project> findByUserAndName(User user, String name);
     Optional<List<Project>> findAllByUser(User user);
+    void deleteByUserAndName(User user, String name);
 }

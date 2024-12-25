@@ -23,6 +23,11 @@ public class SecurityConfig {
                         .requestMatchers("/user/registration").not().fullyAuthenticated()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/user/login").permitAll()
+                        //.requestMatchers("/project/create").authenticated()
+                        .requestMatchers("/project/create").permitAll()
+                        .requestMatchers("/project/get/project").permitAll()
+                        .requestMatchers("/project/get/projects").permitAll()
+                        .requestMatchers("/project/delete").permitAll()
                         .anyRequest().authenticated()
                 );
         return httpSecurity.build();
