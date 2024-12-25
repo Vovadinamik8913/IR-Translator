@@ -26,6 +26,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 conf.json
+*.db
 
 ### NetBeans ###
 /nbproject/private/
