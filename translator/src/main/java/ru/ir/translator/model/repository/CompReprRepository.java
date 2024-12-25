@@ -8,5 +8,5 @@ import ru.ir.translator.model.classes.lang.LLLanguage;
 import java.util.Optional;
 
 public interface CompReprRepository extends JpaRepository<CompilerRepresentation, Long> {
-    Optional<CompilerRepresentation> findByPair(Compiler compiler, LLLanguage language);
+    Optional<CompilerRepresentation> findByCompilerAndLllanguage(Compiler compiler, LLLanguage language);
 }
