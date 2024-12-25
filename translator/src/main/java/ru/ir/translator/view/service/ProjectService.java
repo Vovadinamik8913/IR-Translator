@@ -2,6 +2,7 @@ package ru.ir.translator.view.service;
 
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.ir.translator.model.classes.Project;
 import ru.ir.translator.model.classes.User;
 import ru.ir.translator.model.classes.files.Code;
@@ -13,6 +14,7 @@ import ru.ir.translator.model.repository.RepresentationRepository;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;

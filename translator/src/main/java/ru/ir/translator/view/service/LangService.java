@@ -2,6 +2,7 @@ package ru.ir.translator.view.service;
 
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.ir.translator.model.classes.lang.*;
 import ru.ir.translator.model.repository.CompReprRepository;
 import ru.ir.translator.model.repository.CompilerRepository;
@@ -10,6 +11,7 @@ import ru.ir.translator.model.repository.LangRepository;
 
 import java.util.List;
 
+@Service
 @RequiredArgsConstructor
 public class LangService {
     private final CompilerRepository compilerRepository;
@@ -33,7 +35,7 @@ public class LangService {
 
     @Nullable
     public String getSpecialFlags(Compiler compiler, LLLanguage llLang) {
-        CompilerRepresentation compilerRepresentation = compReprRepository.findByPair(compiler, llLang).orElse(null);
+        CompilerRepresentation compilerRepresentation = compReprRepository.findByCompilerAndLllanguage(compiler, llLang).orElse(null);
         if (compilerRepresentation == null) {
             return null;
         }
