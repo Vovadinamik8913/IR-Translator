@@ -2,6 +2,7 @@ package ru.ir.translator.model.classes.lang;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class Compiler {
     private long id;
     private String name;
     private String path;
+    private boolean compilable;
 
     @ManyToMany @JoinTable(
             name = "compiler_language", // Имя промежуточной таблицы

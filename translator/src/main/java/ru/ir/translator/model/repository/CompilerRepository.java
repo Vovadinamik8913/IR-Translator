@@ -9,4 +9,5 @@ import java.util.Optional;
 
 public interface CompilerRepository extends JpaRepository<Compiler, Long> {
     Optional<Compiler> findByLanguage(Language language);
+    Optional<Compiler> findByName(String name);
 }
