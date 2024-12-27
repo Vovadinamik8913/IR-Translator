@@ -11,7 +11,6 @@ import ru.ir.translator.model.classes.lang.LLLanguage;
 
 @Entity
 @Getter
-@Setter
 public class Representation extends File {
     @ManyToOne
     @JoinColumn(name = "language_id")
