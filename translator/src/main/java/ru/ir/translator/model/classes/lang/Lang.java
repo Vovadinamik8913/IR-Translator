@@ -11,7 +11,9 @@ public enum Lang {
     RUST(300, "rs", "rust"),
     SWIFT(400, "swift", "swift"),
     HASKELL(500, "hs", "haskell"),
-    D(600, "d", "d"),;
+    D(600, "d", "d"),
+    JAVA(700, "java", "java"),
+    LLVMIR(800, "ll", "LLVM IR");
 
     private final int code;
     private final String extension;

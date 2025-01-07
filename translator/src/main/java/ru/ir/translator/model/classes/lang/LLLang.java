@@ -7,7 +7,8 @@ import java.util.stream.Stream;
 @Getter
 public enum LLLang {
     ASM(100, "s", "ASM"),
-    IR(200, "ll", "LLVM IR");
+    IR(200, "ll", "LLVM IR")
+    JBC(300, "class", "JBC");
 
     private final int code;
     private final String extension;
