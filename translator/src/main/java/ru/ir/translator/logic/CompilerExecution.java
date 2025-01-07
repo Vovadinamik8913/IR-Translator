@@ -17,10 +17,16 @@ import java.util.Set;
 public class CompilerExecution {
     @Nullable
     public static Representation compile(CompilerRepresentation compilerRepresentation, Code code, String userFlags) throws IOException {
-        String path = code.getPath().substring(0, code.getPath().lastIndexOf(File.separator));
+        String path = code.getPath();
         File dir = new File(path);
-        String[] innerFlags = compilerRepresentation.getSpecialFlags().split(" ");
-        String[] outerFlags = userFlags.split(" ");
+        String[] innerFlags = null;
+        if (!compilerRepresentation.getSpecialFlags().isEmpty()) {
+            innerFlags = compilerRepresentation.getSpecialFlags().split(" ");
+        }
+        String[] outerFlags = null;
+        if (!userFlags.isEmpty()) {
+            outerFlags = userFlags.split(" ");
+        }
 
         List<String> args = new ArrayList<>();
         args.add(compilerRepresentation.getCompiler().getPath());
@@ -28,7 +34,9 @@ public class CompilerExecution {
         args.add(code.getName());
 
         ProcessBuilder processBuilder = new ProcessBuilder(args);
-        processBuilder.directory(dir);
+        if (!path.isEmpty()) {
+            processBuilder.directory(dir);
+        }
         processBuilder.inheritIO();
         Process process = processBuilder.start();
         try {
@@ -40,10 +48,10 @@ public class CompilerExecution {
             Representation result = new Representation();
             result.setName(
                     code.getName().substring(0, code.getName().lastIndexOf('.'))
-                    + compilerRepresentation.getLllanguage().getType().getExtension()
+                    + "." + compilerRepresentation.getLllanguage().getType().getExtension()
             );
             result.setCompiler(compilerRepresentation.getCompiler());
-            result.setPath(path + File.separator + result.getName());
+            result.setPath(path);
             result.setLanguage(compilerRepresentation.getLllanguage());
             return result;
         }
@@ -64,8 +72,12 @@ public class CompilerExecution {
 
     public static List<String> combineFlags(String[] innerFlags, String[] outerFlags) {
         Set<String> flags = new HashSet<>();
-        flags.addAll(List.of(innerFlags));
-        flags.addAll(List.of(outerFlags));
+        if (innerFlags != null) {
+            flags.addAll(List.of(innerFlags));
+        }
+        if (outerFlags != null) {
+            flags.addAll(List.of(outerFlags));
+        }
         return new ArrayList<>(flags);
     }
 }
