@@ -29,13 +29,22 @@
 }
 
 /* Стили для select и input */
-.select-input,
-.text-input {
+.select-input {
   background-color: #3C3C3C;
   color: #fff;
   border: 1px solid #555;
   border-radius: 4px;
   padding: 5px;
+  width: 100%;
+}
+
+
+.text-input {
+  background-color: #3C3C3C;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-size: 28px;
   width: 93%;
 }
 
