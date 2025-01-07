@@ -8,6 +8,7 @@ import ru.ir.translator.model.classes.Project;
 
 @MappedSuperclass
 @Getter
+@Setter
 public abstract class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,16 +17,13 @@ public abstract class File {
     private String name;
     @Column(nullable = false)
     private String path;
-    @ManyToOne @JoinColumn(name = "compiler_id")
-    private Compiler compiler;
     @ManyToOne @JoinColumn(name = "project_id")
     private Project project;
 
     public File() {}
-    public File(String name, String path, Compiler compiler, Project project) {
+    public File(String name, String path, Project project) {
         this.name = name;
         this.path = path;
-        this.compiler = compiler;
         this.project = project;
     }
 }

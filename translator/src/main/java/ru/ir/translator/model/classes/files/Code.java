@@ -16,8 +16,8 @@ public class Code extends File {
     private Language language;
 
     public Code() {}
-    public Code(String name, String path, Compiler compiler, Project project, Language language) {
-        super(name, path, compiler, project);
+    public Code(String name, String path, Project project, Language language) {
+        super(name, path, project);
         this.language = language;
     }
 }

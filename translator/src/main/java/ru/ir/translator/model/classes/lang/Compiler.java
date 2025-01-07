@@ -14,12 +14,12 @@ public class Compiler {
     private long id;
     private String name;
     private String path;
-    private boolean compilable;
+    //private boolean compilable;
 
     @ManyToMany @JoinTable(
             name = "compiler_language", // Имя промежуточной таблицы
-            joinColumns = @JoinColumn(name = "language_id"), // Внешний ключ для Language
-            inverseJoinColumns = @JoinColumn(name = "compiler_id") // Внешний ключ для Compiler
+            joinColumns = @JoinColumn(name = "compiler_id"), // Внешний ключ для Language
+            inverseJoinColumns = @JoinColumn(name = "language_id") // Внешний ключ для Compiler
     )
     private List<Language> language;
 

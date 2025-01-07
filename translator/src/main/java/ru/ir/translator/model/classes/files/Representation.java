@@ -11,14 +11,18 @@ import ru.ir.translator.model.classes.lang.LLLanguage;
 
 @Entity
 @Getter
+@Setter
 public class Representation extends File {
-    @ManyToOne
-    @JoinColumn(name = "language_id")
+    @ManyToOne  @JoinColumn(name = "language_id")
     private LLLanguage language;
+
+    @ManyToOne @JoinColumn(name = "compiler_id")
+    private Compiler compiler;
 
     public Representation() {}
     public Representation(String name, String path, Compiler compiler, Project project, LLLanguage language) {
-        super(name, path, compiler, project);
+        super(name, path, project);
         this.language = language;
+        this.compiler = compiler;
     }
 }
