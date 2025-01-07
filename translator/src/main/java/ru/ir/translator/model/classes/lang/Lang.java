@@ -6,12 +6,12 @@ import java.util.stream.Stream;
 
 @Getter
 public enum Lang {
-    C(100, ".c", "C"),
-    CPP(200, ".cpp", "C++"),
-    RUST(300, ".rs", "Rust"),
-    SWIFT(400, ".swift", "Swift"),
-    HASKELL(500, ".hs", "Hashell"),
-    D(600, ".d", "D"),;
+    C(100, "c", "c"),
+    CPP(200, "cpp", "cpp"),
+    RUST(300, "rs", "rust"),
+    SWIFT(400, "swift", "swift"),
+    HASKELL(500, "hs", "haskell"),
+    D(600, "d", "d"),;
 
     private final int code;
     private final String extension;
@@ -20,6 +20,13 @@ public enum Lang {
         code = i;
         extension = s;
         name = s1;
+    }
+
+    public static Lang of(String name) throws IllegalArgumentException {
+        return Stream.of(Lang.values())
+                .filter(l -> l.name.equals(name))
+                .findFirst()
+                .orElseThrow(IllegalArgumentException::new);
     }
 
 

@@ -14,19 +14,19 @@ public class LLLanguage {
     private LLLang type;
 
     @Basic
-    private int langCode;
+    private String name;
 
     @PostLoad
     private void fillTransient() {
-        if (langCode > 0) {
-            this.type = LLLang.of(langCode);
+        if (name != null && !name.isEmpty()) {
+            this.type = LLLang.of(name);
         }
     }
 
     @PrePersist
     private void fillPersistent() {
         if (type != null) {
-            this.langCode = type.getCode();
+            this.name = type.getName();
         }
     }
 }

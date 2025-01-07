@@ -6,10 +6,8 @@ import java.util.stream.Stream;
 
 @Getter
 public enum LLLang {
-    ASM(100, ".s", "Assembler"),
-    IR(200, ".ll", "LLVM IR"),
-    SVG(300, ".svg", "SVG"),
-    DOTNET(400, ".dot", "Dot");
+    ASM(100, "s", "ASM"),
+    IR(200, "ll", "LLVM IR");
 
     private final int code;
     private final String extension;
@@ -23,6 +21,13 @@ public enum LLLang {
     public static LLLang of(int code) throws IllegalArgumentException {
         return Stream.of(LLLang.values())
                 .filter(l -> l.code  == code)
+                .findFirst()
+                .orElseThrow(IllegalArgumentException::new);
+    }
+
+    public static LLLang of(String name) throws IllegalArgumentException {
+        return Stream.of(LLLang.values())
+                .filter(l -> l.name.equals(name))
                 .findFirst()
                 .orElseThrow(IllegalArgumentException::new);
     }
