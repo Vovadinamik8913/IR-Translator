@@ -86,6 +86,9 @@ public class LangController {
         if (type == null) {
             return ResponseEntity.ofNullable(null);
         }
+        if (type == LLLang.JBC) {
+            return ResponseEntity.ok(".txt");
+        }
         return ResponseEntity.ok(type.getExtension());
     }
 }

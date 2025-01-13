@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Entity
 @Table(name = "compiler_representation")
 @Getter
@@ -22,7 +25,7 @@ public class CompilerRepresentation {
     private Compiler compiler;
 
     @Transient
-    private String[] flags;
+    private List<String> flags;
 
     @Basic
     private String specialFlags;
@@ -30,7 +33,7 @@ public class CompilerRepresentation {
     @PostLoad
     private void fillTransient() {
         if (specialFlags != null) {
-            this.flags = specialFlags.split(" ");
+            this.flags = Arrays.stream(specialFlags.split(" ")).toList();
         }
     }
 

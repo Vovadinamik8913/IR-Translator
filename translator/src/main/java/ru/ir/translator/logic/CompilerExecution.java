@@ -15,29 +15,75 @@ import java.util.List;
 import java.util.Set;
 
 public class CompilerExecution {
+
     @Nullable
-    public static Representation compile(CompilerRepresentation compilerRepresentation, Code code, String userFlags) throws IOException {
+    public static CompilerRepresentation select(@Nullable List<CompilerRepresentation> compilerRepresentations,
+                                         @Nullable CompilerRepresentation userSelected, String[] flags) {
+        if (compilerRepresentations != null) {
+            for (CompilerRepresentation compilerRepresentation : compilerRepresentations) {
+                for (String flag : flags) {
+                    if (compilerRepresentation.getFlags().contains(flag)) {
+                        return compilerRepresentation;
+                    }
+                }
+            }
+        }
+        return userSelected;
+    }
+
+    private static String redirectFlag(String arg, String name, String fileExtension) {
+        String res = arg + " ";
+        res += name.substring(0, name.lastIndexOf("."))+fileExtension;
+        return res;
+    }
+
+    @Nullable
+    public static Representation compile(CompilerRepresentation compilerRepresentation, Code code, List<String> userFlags) throws IOException {
+        boolean redir = false;
         String path = code.getPath();
         File dir = new File(path);
-        String[] innerFlags = null;
-        if (!compilerRepresentation.getSpecialFlags().isEmpty()) {
-            innerFlags = compilerRepresentation.getSpecialFlags().split(" ");
+        List<String> innerFlags = new ArrayList<>();
+        if (!compilerRepresentation.getFlags().isEmpty()) {
+            innerFlags = new ArrayList<>();
+            innerFlags.addAll(compilerRepresentation.getFlags());
+            if (innerFlags.contains("-o")) {
+                innerFlags.remove("-o");
+                innerFlags.add(redirectFlag("-o", code.getName(),
+                        compilerRepresentation.getLllanguage().getType().getExtension()));
+            }
+            if (innerFlags.contains(">")) {
+                innerFlags.remove(">");
+                redir = true;
+            }
         }
-        String[] outerFlags = null;
+        List<String> outerFlags = new ArrayList<>();
         if (!userFlags.isEmpty()) {
-            outerFlags = userFlags.split(" ");
+            outerFlags.addAll(userFlags);
         }
 
+        List<String> flags = combineFlags(innerFlags, outerFlags);
         List<String> args = new ArrayList<>();
         args.add(compilerRepresentation.getCompiler().getPath());
-        args.addAll(combineFlags(innerFlags, outerFlags));
+        args.addAll(flags);
         args.add(code.getName());
+        if (redir) {
+            //args.add(redirectFlag(">", code.getName(),
+              //      compilerRepresentation.getLllanguage().getType().getExtension()));
+        }
 
         ProcessBuilder processBuilder = new ProcessBuilder(args);
         if (!path.isEmpty()) {
             processBuilder.directory(dir);
         }
-        processBuilder.inheritIO();
+        if (redir) {
+            File file = new File(
+                    code.getName().substring(0, code.getName().lastIndexOf("."))
+                            + compilerRepresentation.getLllanguage().getType().getExtension());
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            processBuilder.redirectOutput(file);
+        }
         Process process = processBuilder.start();
         try {
             process.waitFor();
@@ -48,11 +94,12 @@ public class CompilerExecution {
             Representation result = new Representation();
             result.setName(
                     code.getName().substring(0, code.getName().lastIndexOf('.'))
-                    + "." + compilerRepresentation.getLllanguage().getType().getExtension()
+                            + compilerRepresentation.getLllanguage().getType().getExtension()
             );
             result.setCompiler(compilerRepresentation.getCompiler());
             result.setPath(path);
             result.setLanguage(compilerRepresentation.getLllanguage());
+            result.setFlags(flags);
             return result;
         }
         return null;
@@ -70,14 +117,10 @@ public class CompilerExecution {
         }
     }
 
-    public static List<String> combineFlags(String[] innerFlags, String[] outerFlags) {
+    private static List<String> combineFlags(List<String> innerFlags, List<String> outerFlags) {
         Set<String> flags = new HashSet<>();
-        if (innerFlags != null) {
-            flags.addAll(List.of(innerFlags));
-        }
-        if (outerFlags != null) {
-            flags.addAll(List.of(outerFlags));
-        }
+        flags.addAll(innerFlags);
+        flags.addAll(outerFlags);
         return new ArrayList<>(flags);
     }
 }

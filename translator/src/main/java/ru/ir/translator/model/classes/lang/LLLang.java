@@ -6,9 +6,9 @@ import java.util.stream.Stream;
 
 @Getter
 public enum LLLang {
-    ASM("s", "ASM"),
-    IR("ll", "LLVM IR"),
-    JBC("class", "JBC");
+    ASM(".s", "ASM"),
+    IR(".ll", "LLVM IR"),
+    JBC(".class", "JBC");
 
     private final String extension;
     private final String name;

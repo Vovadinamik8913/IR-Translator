@@ -71,4 +71,9 @@ public class LangService {
     public CompilerRepresentation getCompilerRepr(Compiler compiler, LLLanguage lang) {
         return compReprRepository.findByCompilerAndLllanguage(compiler, lang).orElse(null);
     }
+
+    @Nullable
+    public List<CompilerRepresentation> getCompRepresentations(Compiler compiler) {
+        return compReprRepository.findAllByCompiler(compiler).orElse(null);
+    }
 }

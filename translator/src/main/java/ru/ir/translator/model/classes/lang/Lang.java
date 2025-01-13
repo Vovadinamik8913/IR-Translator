@@ -6,14 +6,15 @@ import java.util.stream.Stream;
 
 @Getter
 public enum Lang {
-    C("c", "c"),
-    CPP("cpp", "cpp"),
-    RUST("rs", "rust"),
-    SWIFT("swift", "swift"),
-    HASKELL("hs", "haskell"),
-    D("d", "d"),
-    JAVA("java", "java"),
-    LLVMIR("ll", "LLVM IR");
+    C(".c", "c"),
+    CPP(".cpp", "cpp"),
+    RUST(".rs", "rust"),
+    SWIFT(".swift", "swift"),
+    HASKELL(".hs", "haskell"),
+    D(".d", "d"),
+    JAVA(".java", "java"),
+    LLVMIR(".ll", "LLVM IR"),;
+    //KOTLIN(".kt", "kotlin");
 
     private final String extension;
     private final String name;
