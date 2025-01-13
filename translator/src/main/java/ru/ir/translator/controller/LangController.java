@@ -28,7 +28,9 @@ public class LangController {
         List<Language> languages = langService.getLanguages();
         List<String> result = new ArrayList<>();
         for (Language language : languages) {
-            result.add(language.getLang().getName());
+            if (language.getLang() != Lang.JBC) {
+                result.add(language.getLang().getName());
+            }
         }
         return ResponseEntity.ok(result);
     }

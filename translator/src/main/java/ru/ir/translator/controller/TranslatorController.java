@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,6 +60,10 @@ public class TranslatorController {
     private void create(byte[] src, String name, String path) throws IOException {
         File file;
         if (!path.isEmpty()) {
+            file = new File(path);
+            if (!file.exists()) {
+                file.mkdir();
+            }
             file = new File(path + File.separator + name);
         } else {
             file = new File(name);
@@ -72,32 +77,65 @@ public class TranslatorController {
         stream.close();
     }
 
-    private Code create(String name, String path, Project project, Language language) {
-        Code code = new Code(name, path, project, language);
-        return code;
+    private void delete(String path, String name) throws IOException {
+        if (path.isEmpty() && name.isEmpty()) {
+            return;
+        }
+        if (name.isEmpty()) {
+            new File(path).delete();
+        }
+        if (path.isEmpty()) {
+            new File(name).delete();
+        } else {
+            new File(path + File.separator + name).delete();
+        }
     }
 
     @Nullable
-    private byte[] translate(byte[] src, String fileName,
+    private byte[] translate(byte[] src, String fileName, String path,
                                  Language language, CompilerRepresentation compilerRepresentation,
                                  List<String> flags) throws IOException {
         byte[] bytes;
-        create(src, fileName, "");
-        Code code = create(fileName, "", null, language);
+        create(src, fileName, path);
+        Code code = new Code(fileName, path, null, language);
         Representation representation = CompilerExecution.compile(compilerRepresentation, code, flags);
-        new File(fileName).delete();
+        if (representation != null && representation.getLanguage().getType() == LLLang.JBC) {
+            delete(code.getPath(), code.getName());
+            String version = compilerRepresentation.getCompiler().getName();
+            version = version.substring(version.indexOf("-"));
+            String compiler = "javap" + version;
+            CompilerRepresentation tmp = getCompilerRepresentation(
+                    compiler, "Text", new String[]{}
+            );
+            Language newLang = langService.getLanguage("JBC");
+            if (tmp != null && newLang != null) {
+                code = new Code(representation.getName(), representation.getPath(), null, newLang);
+                representation = CompilerExecution.compile(tmp, code, new ArrayList<>());
+            }
+        }
+        delete(code.getPath(), code.getName());
         if (representation == null) {
             return null;
         }
-        File file = new File(representation.getName());
-        if (file.exists()) {
-            System.out.println(file.getAbsolutePath());
+        File file;
+        if (representation.getPath().isEmpty()) {
+            file = new File(representation.getName());
         } else {
-            System.out.println("error");
+            file = new File(representation.getPath() + File.separator + representation.getName());
         }
         bytes = Files.readAllBytes(file.toPath());
         file.delete();
-       return  bytes;
+        delete(representation.getPath(), "");
+        return  bytes;
+    }
+
+    private String getFilename(Lang language, MultipartFile file) {
+        if (language != Lang.JAVA) {
+            return UUID.randomUUID() + language.getExtension();
+        }
+        
+        return file.getOriginalFilename().substring(0, file.getOriginalFilename().lastIndexOf("."))
+                + language.getExtension();
     }
 
     @Operation(summary = "Получение представления")
@@ -124,11 +162,15 @@ public class TranslatorController {
             return ResponseEntity.badRequest().build();
         }
 
-        String fileName = UUID.randomUUID() + lang.getExtension();
+        String path = "";
+        if (lang == Lang.JAVA) {
+            path = UUID.randomUUID().toString();
+        }
+        String fileName = getFilename(lang, file);
         fileName = fileName.replace("-", "_");
         byte[] bytes;
         try {
-            bytes = translate(file.getBytes(), fileName,
+            bytes = translate(file.getBytes(), fileName, path,
                     language, compilerRepresentation, List.of(flags));
         } catch (IOException e) {
             e.printStackTrace();

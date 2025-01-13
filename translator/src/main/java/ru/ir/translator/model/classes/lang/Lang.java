@@ -13,7 +13,8 @@ public enum Lang {
     HASKELL(".hs", "haskell"),
     D(".d", "d"),
     JAVA(".java", "java"),
-    LLVMIR(".ll", "LLVM IR"),;
+    LLVMIR(".ll", "LLVM IR"),
+    JBC(".class", "JBC");
     //KOTLIN(".kt", "kotlin");
 
     private final String extension;

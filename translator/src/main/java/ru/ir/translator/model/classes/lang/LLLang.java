@@ -8,7 +8,8 @@ import java.util.stream.Stream;
 public enum LLLang {
     ASM(".s", "ASM"),
     IR(".ll", "LLVM IR"),
-    JBC(".class", "JBC");
+    JBC(".class", "JBC"),
+    TEXT(".txt", "Text"),;
 
     private final String extension;
     private final String name;

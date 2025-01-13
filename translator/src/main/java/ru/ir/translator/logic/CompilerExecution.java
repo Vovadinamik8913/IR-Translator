@@ -43,7 +43,8 @@ public class CompilerExecution {
         String path = code.getPath();
         File dir = new File(path);
         List<String> innerFlags = new ArrayList<>();
-        if (!compilerRepresentation.getFlags().isEmpty()) {
+        if (compilerRepresentation.getFlags() != null
+                && !compilerRepresentation.getFlags().isEmpty()) {
             innerFlags = new ArrayList<>();
             innerFlags.addAll(compilerRepresentation.getFlags());
             if (innerFlags.contains("-o")) {
@@ -66,17 +67,13 @@ public class CompilerExecution {
         args.add(compilerRepresentation.getCompiler().getPath());
         args.addAll(flags);
         args.add(code.getName());
-        if (redir) {
-            //args.add(redirectFlag(">", code.getName(),
-              //      compilerRepresentation.getLllanguage().getType().getExtension()));
-        }
 
         ProcessBuilder processBuilder = new ProcessBuilder(args);
         if (!path.isEmpty()) {
             processBuilder.directory(dir);
         }
         if (redir) {
-            File file = new File(
+            File file = new File( path + File.separator +
                     code.getName().substring(0, code.getName().lastIndexOf("."))
                             + compilerRepresentation.getLllanguage().getType().getExtension());
             if (!file.exists()) {
