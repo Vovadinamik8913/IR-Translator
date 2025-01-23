@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.ir.translator.model.classes.User;
 import ru.ir.translator.model.repository.UserRepository;
@@ -17,12 +18,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
 
     public void create(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()).toCharArray());
-        userRepository.save(user);
+        if (userRepository.findByLogin(user.getLogin()).isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            userRepository.save(user);
+        }
     }
 
     @Nullable
@@ -32,6 +35,11 @@ public class UserService {
             return user;
         }
         return null;
+    }
+
+    @Nullable
+    public User get(String login) {
+        return userRepository.findByLogin(login).orElse(null);
     }
 
     @Nullable

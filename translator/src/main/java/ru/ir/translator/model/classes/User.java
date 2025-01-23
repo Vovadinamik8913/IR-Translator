@@ -20,7 +20,7 @@ public class User {
     private String login;
     @Column(nullable = false)
     @Setter
-    private char[] password;
+    private String password;
     @Column(nullable = false)
     private String email;
     @OneToMany(mappedBy = "user")
@@ -33,13 +33,9 @@ public class User {
     public User(String login, String password, String email) throws RuntimeException {
         this();
         this.login = login;
-        this.password = password.toCharArray();
+        this.password = password;
         this.email = email;
     }
 
-
-    public String getPassword() {
-        return new String(password);
-    }
 
 }
