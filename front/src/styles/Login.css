@@ -1,6 +1,6 @@
-/* LoginModal.css */
+/* Login.css */
 
-.modal-overlay {
+.login-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -13,7 +13,7 @@
     z-index: 1000;
 }
 
-.modal {
+.login-modal {
     background: #fff;
     padding: 30px;
     border-radius: 8px;
@@ -22,7 +22,7 @@
     max-width: 90%;
 }
 
-.close-button {
+.login-modal .close-button {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -32,23 +32,23 @@
     cursor: pointer;
 }
 
-.modal h2 {
+.login-modal h2 {
     margin-bottom: 20px;
     text-align: center;
 }
 
-.modal form {
+.login-modal form {
     display: flex;
     flex-direction: column;
 }
 
-.modal input {
+.login-modal input {
     margin-bottom: 15px;
     padding: 10px;
     font-size: 16px;
 }
 
-.modal button[type="submit"] {
+.login-modal button[type="submit"] {
     padding: 10px;
     font-size: 16px;
     background-color: #2D2D2D;
@@ -58,7 +58,7 @@
     margin-bottom: 10px;
 }
 
-.toggle-text {
+.login-modal .toggle-text {
     text-align: center;
     color: #007BFF;
     cursor: pointer;

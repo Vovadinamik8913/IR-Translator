@@ -31,18 +31,14 @@ const Login = ({ onClose }) => {
                     method: 'POST',
                     body: buildFormData
                 });
-
                 const data = await response.json();
 
                 if (response.ok) {
                     // Если вход успешен
                     setSuccessMessage('Вход выполнен успешно!');
                     setErrorMessage('');
-                    // Сохраняем UUID или выполняем другие действия
-                    const userUUID = data;
-                    console.log('User UUID:', userUUID);
-                    // Например, сохраняем UUID в localStorage
-                    localStorage.setItem('userUUID', userUUID);
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', data.uuid);
                     // Закрываем модальное окно или перенаправляем пользователя
                     onClose();
                 } else {
@@ -66,19 +62,18 @@ const Login = ({ onClose }) => {
                     method: 'POST',
                     body: buildFormData
                 });
+                console.log(response);
                 const data = await response.json();
 
                 if (response.ok) {
                     // Если регистрация успешна
                     setSuccessMessage('Регистрация прошла успешно!');
                     setErrorMessage('');
-                    // Сохраняем UUID или выполняем другие действия
-                    const userUUID = data;
-                    console.log('User UUID:', userUUID);
-                    // Например, сохраняем UUID в localStorage
-                    localStorage.setItem('userUUID', userUUID);
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', data.uuid);
                     // Переключаемся на режим входа или закрываем модальное окно
                     setIsLogin(true);
+                    onClose();
                 } else {
                     // Если произошла ошибка
                     setErrorMessage(data.message || 'Ошибка при регистрации. Попробуйте снова.');
@@ -93,8 +88,8 @@ const Login = ({ onClose }) => {
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="modal">
+        <div className="login-overlay">
+            <div className="login-modal">
                 <button className="close-button" onClick={onClose}>×</button>
                 <h2>{isLogin ? 'Вход' : 'Регистрация'}</h2>
                 <form onSubmit={handleSubmit}>
