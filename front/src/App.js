@@ -10,6 +10,11 @@ function App() {
     const [fileExtension, setFileExtension] = useState("");
     const [compilers, setCompilers] = useState([]);
 
+    const [selectedRepresentation, setSelectedRepresentation] = useState('');
+    const [representation, setRepresentation] = useState('');
+    const [compilerFlags, setCompilerFlags] = useState('');
+    const [compiler, setCompiler] = useState('');
+
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         return () => {
@@ -19,22 +24,30 @@ function App() {
 
     return (
         <div className="App">
-            <Header/>
+            <Header
+                code = {code} setCode={setCode}
+                language={language} setLanguage={setLanguage}
+                representation={representation} setRepresentation={setRepresentation}
+                compiler={compiler} setCompiler={setCompiler}
+                flags={compilerFlags} setFlags={setCompilerFlags}
+                reprLanguage={selectedRepresentation} setReprLanguage={setSelectedRepresentation}
+            />
             <div className="main-container">
                 <CodeEditor
-                    code={code}
-                    setCode={setCode}
+                    code={code} setCode={setCode}
                     setCompilers={setCompilers}
-                    language={language}
-                    setLanguage={setLanguage}
-                    fileExtension={fileExtension}
-                    setFileExtension={setFileExtension}
+                    language={language} setLanguage={setLanguage}
+                    fileExtension={fileExtension} setFileExtension={setFileExtension}
                 />
                 <Representaion
                     codeExtention={fileExtension}
                     language={language}
                     code={code}
                     compilers={compilers}
+                    compiler={compiler} setCompiler={setCompiler}
+                    compilerFlags={compilerFlags} setCompilerFlags={setCompilerFlags}
+                    representation={representation} setRepresentation={setRepresentation}
+                    selectedRepresentation={selectedRepresentation} setSelectedRepresentation={setSelectedRepresentation}
                 />
             </div>
         </div>

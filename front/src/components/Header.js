@@ -2,28 +2,55 @@ import React, { useState } from 'react';
 import logo from '../assets/logo.ico'; // Убедитесь, что путь к логотипу правильный
 import '../styles/Header.css'; // Импорт стилей
 import Login from './Login'; // Импортируем модальное окно
+import Projects from './Projects';
 
-const Header = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false); // Состояние для управления открытием модального окна
+const Header = ({
+    code, setCode,
+    language, setLanguage,
+    representation, setRepresentation,
+    reprLanguage, setReprLanguage,
+    compiler, setCompiler,
+    flags, setFlags
+}) => {
+    const [isModalOpen, setIsLoginModalOpen] = useState(false); // Состояние для управления открытием модального окна
+    const [isProjectsModalOpen, setIsProjectsModalOpen] = useState(false);
+    
+    // Открыть / закрыть модалку логина
+  const handleOpenLogin = () => setIsLoginModalOpen(true);
+  const handleCloseLogin = () => setIsLoginModalOpen(false);
 
-    const handleLoginClick = () => {
-        setIsModalOpen(true); // Открываем модальное окно
-    };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false); // Закрываем модальное окно
-    };
+  // Открыть / закрыть модалку с проектами
+  const handleOpenProjects = () => setIsProjectsModalOpen(true);
+  const handleCloseProjects = () => setIsProjectsModalOpen(false);
 
     return (
         <header className="header">
+            <button className="button project" onClick={handleOpenProjects}>
+            </button>
             <div className="logo-container">
                 <img src={logo} alt="Logo" className="logo-image" />
                 <span className="logo-text">IR TRANSLATOR</span>
             </div>
-            <button className="login-button" onClick={handleLoginClick}>
+            <button className="login-button" onClick={handleOpenLogin}>
                 Вход / Регистрация
             </button>
-            {isModalOpen && <Login onClose={handleCloseModal} />}
+            {isModalOpen && <Login onClose={handleCloseLogin} />}
+            {isProjectsModalOpen && 
+            <Projects
+                code={code}
+                setCode={setCode}
+                representation={representation}
+                setRepresentation={setRepresentation}
+                language={language}
+                setLanguage={setLanguage}
+                reprLanguage={reprLanguage}
+                setReprLanguage={setReprLanguage}
+                compiler={compiler}
+                setCompiler={setCompiler}
+                flags={flags}
+                setFlags={setFlags}
+                onClose={handleCloseProjects} 
+            />}
         </header>
     );
 };

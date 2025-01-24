@@ -1,0 +1,103 @@
+/* Projects.css */
+
+.projects-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.projects-modal {
+    background: #fff;
+    color: #2D2D2D;
+    padding: 30px;
+    border-radius: 8px;
+    position: relative;
+    width: 70%;
+    height: 70%;
+    max-width: 90%;
+    align-items: center;
+}
+
+.projects-modal.not-registrated {
+    background: #fff;
+    color: #2D2D2D;
+    padding: 30px;
+    border-radius: 8px;
+    position: relative;
+    width: 10%;
+    height: 10%;
+    font-size: 20px;
+    max-width: 90%;
+    align-items: center;
+}
+
+.projects-modal h2 {
+    color: #2D2D2D;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.projects-modal input {
+    margin-bottom: 15px;
+    padding: 10px;
+    font-size: 20px;
+}
+
+.projects-modal .toggle-text {
+    text-align: center;
+    color: #007BFF;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.projects-modal button {
+    padding: 10px;
+    background-color: #2D2D2D;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+.projects-modal .close-button {
+    position: absolute;
+    color: #2D2D2D;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 40px;
+    cursor: pointer;
+}
+
+.projects-modal button:hover {
+    background: #e2e2e2;
+}
+
+.projects-modal .select-input {
+    background-color: #3C3C3C;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 4px;
+    width: 40%;
+    font-size: 20px;
+    text-align: center;
+}
+
+.files {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
+    overflow-y: auto;
+    height: 250px;
+}
+
