@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Selector from './Selector';
 import Editor from '@monaco-editor/react';
-import '../styles/CodeEditor.css';
+import '../styles/Code.css';
 import {handleCodeMount} from './MonacoMount'
+import FontSize from './FontSize';
 
 
 const CodeEditor = ({ 
@@ -15,6 +16,7 @@ const CodeEditor = ({
   setFileExtension
 }) => {
   const [languages, setLanguages] = useState([]);
+  const [fontSize, setFontSize] = useState(14);
 
   // Получаем список языков при загрузке компонента
   useEffect(() => {
@@ -70,7 +72,7 @@ const CodeEditor = ({
         .then((response) => response.text())
         .then((data) => {
           if (data) {
-            setFileExtension("." +  data);
+            setFileExtension(data);
           } else {
             setFileExtension('.txt');
           }
@@ -113,6 +115,9 @@ const CodeEditor = ({
     <div className="window form">
       {/* Хедер */}
       <div className="info">
+        <FontSize
+          setFontSize={setFontSize}
+        />
         {/* Выбор языка */}
         <Selector
           src={languages}
@@ -131,12 +136,11 @@ const CodeEditor = ({
           height="100%"
           language={language}
           value={code}
-          onChange={handleCodeChange}
-          theme="myCustomColorfulTheme" // Указываем нашу пользовательскую яркую тему
+          onChange={handleCodeChange} // Указываем нашу пользовательскую яркую тему
           beforeMount={handleCodeMount} // Определяем тему перед монтированием редактора
           options={{ 
             selectOnLineNumbers: true,
-            fontSize: 20
+            fontSize: fontSize
           }}
         />
       </div>

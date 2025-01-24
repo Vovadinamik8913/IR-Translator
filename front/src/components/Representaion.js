@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import Selector from './Selector';
-import '../styles/Representation.css';
+import '../styles/Code.css';
 import {handleRepresentationMount} from './MonacoMount'
+import FontSize from './FontSize';
 
 const Representation = ({
   code,
   codeExtention,
   language,
-  compilers
+  compilers,
+  compiler, setCompiler,
+  compilerFlags, setCompilerFlags,
+  representation, setRepresentation,
+  selectedRepresentation, setSelectedRepresentation
 }) => {
-  const [selectedRepresentation, setSelectedRepresentation] = useState('');
-  const [representation, setRepresentation] = useState('');
-  const [compilerFlags, setCompilerFlags] = useState('');
-  const [compiler, setCompiler] = useState('');
   const [representations, setRepresentations] = useState([]);
   const [reprExtension, setReprExtension] = useState('');
-  const [downloadLink, setDownloadLink] = useState(null);
-  const [downloadFileName, setDownloadFileName] = useState('output.txt');
+  const [fontSize, setFontSize] = useState(14);
 
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const Representation = ({
         });
         const data = await response.json();
         setRepresentations(data);
-        setRepresentation('');
+        //setRepresentation('');
         if (data.length > 0) {
           setSelectedRepresentation(data[0]);
         }
@@ -53,7 +53,7 @@ const Representation = ({
     if (selectedRepresentation) {
       const fetchReprExtension = async () => {
         const buildFormData = new FormData();
-        buildFormData.append('representation', selectedRepresentation);
+        buildFormData.append('lang', selectedRepresentation);
 
         try {
           const response = await fetch('/lang/repr-extension', {
@@ -62,7 +62,7 @@ const Representation = ({
           });
           const data = await response.text();
           if (data) {
-            setReprExtension('.' + data);
+            setReprExtension(data);
           } else {
             setReprExtension('.txt');
           }
@@ -76,27 +76,73 @@ const Representation = ({
     }
   }, [selectedRepresentation]);
 
-
-    const handleRepresentationChange = (selectedOption) => {
+  const handleRepresentationChange = (selectedOption) => {
       setSelectedRepresentation(selectedOption.value);
       setRepresentation('');
-    };
+  };
+
+   // Функция для удаления определенных строк
+  const formatContent = (content) => {
+    // Разбиваем содержимое на строки
+    const lines = content.split('\n');
+    console.log(lines);
+
+    // Шаблоны для удаления
+    const patternsToRemove = [
+      /^;.*/,
+      /^#.*/,
+      /^\..*/,
+      /^!.*/,                    // Удалить строки, начинающиеся с '!' и содержат '='
+      /^source_filename.*/,         // Удалить строку с 'source_filename = '
+      /^target .*/,                    // Удалить строки с 'target datalayout' и 'target triple'
+      /^\.Lfunc_end.*/             // Удалить строки с '.Lfunc_end'
+    ];
+
+    // Фильтруем строки
+    var filteredLines = lines.filter((line) => {
+      // Проверяем, соответствует ли линия какому-либо шаблону
+      for (const pattern of patternsToRemove) {
+        if (pattern.test(line.trim())) {
+          return false;
+        }
+      }
+      return true;
+    });
+    const lastIndex = filteredLines.length - 1 - filteredLines.slice().reverse().findIndex(line => line.trim() !== '');
+
+    filteredLines = filteredLines.filter((line, index) => {
+      if(index === 0 && line.trim() === '') {
+        return false;
+      }
+      if(index > lastIndex) {
+        return false;
+      }
+      return true;
+    })
+
+    // Удаляем лишние пустые строки
+    const formattedLines = filteredLines.join('\n').replace(/\n{2,}/g, '\n\n');
+
+    return formattedLines;
+  };
   
-    const handleProcessCode = async () => {
+  const handleProcessCode = async () => {
       try {
         // Шаг 1: Формируем файл из текста кода
         const fileExtension = codeExtention || '.txt';
-        const fileName = 'code' + fileExtension;
+        var fileName = 'code' + fileExtension;
+        if(language === "java") {
+          fileName = getJavaClassName(code) + fileExtension;
+        }
+        console.log(fileName);
         const codeFile = new File([code], fileName, { type: 'text/plain' });
   
         // Шаг 2: Подготавливаем FormData
         const formData = new FormData();
-        //formData.append('user', null); 
-        //formData.append('project', null); 
         formData.append('language', language); // Предполагается, что расширение соответствует языку
         formData.append('compiler', compiler);
         formData.append('representation', selectedRepresentation);
-        formData.append('flags', compilerFlags); // Если есть флаги компилятора
+        formData.append('flags', compilerFlags.split(" ")); // Если есть флаги компилятора
         formData.append('code', codeFile);
   
         // Шаг 3: Отправляем запрос на сервер
@@ -111,12 +157,8 @@ const Representation = ({
   
           // Отображаем содержимое файла
           const text = await blob.text();
-          setRepresentation(text);
-  
-          // Создаем URL для скачивания файла
-          const url = URL.createObjectURL(blob);
-          setDownloadLink(url);
-          setDownloadFileName('output' + reprExtension);
+          const formatted = formatContent(text);
+          setRepresentation(formatted);
         } else {
           // Обработка ошибок
           console.error('Ошибка при обработке кода на сервере');
@@ -124,16 +166,15 @@ const Representation = ({
       } catch (error) {
         console.error('Ошибка при обработке кода:', error);
       }
-    };
-
-
-  const handleDownloadFile = () => {
-    const link = document.createElement('a');
-    link.href = downloadLink;
-    link.download = downloadFileName;
-    link.click();
   };
 
+  const handleDownloadFile = () => {
+    const blob = new Blob([representation], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `repr${reprExtension}`;
+    link.click();
+  };
 
   const handleCompilerChange = (selectedOption) => {
     setCompiler(selectedOption.value);
@@ -144,6 +185,14 @@ const Representation = ({
     setCompilerFlags(event.target.value);
   };
   
+  const getJavaClassName = (code) => {
+    // Ищем первое вхождение слова "class"
+    // и захватываем слово (состоящее из букв, цифр и _) после него.
+    const pattern = /class +([A-Za-z0-9_]+)/;
+    const match = code.match(pattern);
+    return match ? match[1] : null;
+  }
+  
 
   return (
     <div className="window form">
@@ -152,7 +201,9 @@ const Representation = ({
         <div className="margin-right-15">
           <button className="button run" onClick={handleProcessCode}></button>
         </div>
-
+        <FontSize
+          setFontSize={setFontSize}
+        />
         {/* Выбор компилятора */}
         <Selector
           src={compilers}
@@ -189,7 +240,7 @@ const Representation = ({
         language={selectedRepresentation}
         value={representation}
         options={{
-          fontSize: 20,
+          fontSize: fontSize,
           readOnly: true,
         }}
         beforeMount={handleRepresentationMount}

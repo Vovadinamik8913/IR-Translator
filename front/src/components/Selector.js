@@ -2,6 +2,7 @@ import React from 'react';
 import Select from 'react-select';
 
 const Selector = ({ onChange, elem, src, text }) => {
+
   const options = src.map((elem) => ({
     value: elem,
     label: elem,
