@@ -14,7 +14,8 @@ public enum Lang {
     D(".d", "d"),
     JAVA(".java", "java"),
     LLVMIR(".ll", "LLVM IR"),
-    JBC(".class", "JBC");
+    JBC(".class", "JBC"),
+    CRYSTAL(".cr", "crystal");
     //KOTLIN(".kt", "kotlin");
 
     private final String extension;
