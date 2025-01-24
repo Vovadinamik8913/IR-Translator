@@ -1,19 +1,24 @@
 package ru.ir.translator.model.classes.files;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import ru.ir.translator.model.classes.Project;
 import ru.ir.translator.model.classes.lang.Compiler;
+import ru.ir.translator.model.classes.lang.CompilerRepresentation;
 import ru.ir.translator.model.classes.lang.Language;
+
+import java.util.List;
 
 @Entity
 @Getter
 public class Code extends File {
-    @ManyToOne
-    @JoinColumn(name = "language_id")
+    @ManyToOne @JoinColumn(name = "language_id")
+    @Setter
     private Language language;
+
+    @OneToOne(mappedBy = "code")
+    private Representation representation;
 
     public Code() {}
     public Code(String name, String path, Project project, Language language) {

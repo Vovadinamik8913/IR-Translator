@@ -5,14 +5,11 @@ import ru.ir.translator.model.classes.files.Code;
 import ru.ir.translator.model.classes.files.Representation;
 import ru.ir.translator.model.classes.lang.Compiler;
 import ru.ir.translator.model.classes.lang.CompilerRepresentation;
-import ru.ir.translator.model.classes.lang.LLLanguage;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class CompilerExecution {
 
@@ -115,9 +112,12 @@ public class CompilerExecution {
     }
 
     private static List<String> combineFlags(List<String> innerFlags, List<String> outerFlags) {
-        Set<String> flags = new HashSet<>();
-        flags.addAll(innerFlags);
-        flags.addAll(outerFlags);
-        return new ArrayList<>(flags);
+        List<String> flags = new ArrayList<>(innerFlags);
+        for (String flag : outerFlags) {
+            if (!flags.contains(flag)) {
+                flags.add(flag);
+            }
+        }
+        return flags;
     }
 }

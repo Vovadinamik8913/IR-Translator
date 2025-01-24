@@ -1,5 +1,8 @@
 package ru.ir.translator.model.classes;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import ru.ir.translator.model.classes.files.Code;
@@ -16,10 +19,13 @@ public class Project {
     @Column(nullable = false)
     private String name;
     @ManyToOne @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
     @OneToMany(mappedBy = "project")
+    @JsonIgnore
     private List<Code> code;
     @OneToMany(mappedBy = "project")
+    @JsonIgnore
     private List<Representation> representation;
 
     public Project() {}

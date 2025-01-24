@@ -17,7 +17,6 @@ import ru.ir.translator.view.service.UserService;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +29,7 @@ public class ProjectController {
 
     @Operation(summary = "создание нового проекта")
     @PostMapping("/create")
-    public ResponseEntity<Long> createProject(
+    public ResponseEntity<Project> createProject(
             @Parameter(description = "User", required = true) @RequestParam("user") UUID userId,
             @Parameter(description = "Project", required = true) @RequestParam("project") String projectName
     ) {
@@ -50,29 +49,12 @@ public class ProjectController {
         if (!projectDir.exists()) {
             projectDir.mkdirs();
         }
-        return ResponseEntity.ok(project.getId());
-    }
-
-    @Operation(summary = "получить проект")
-    @PostMapping("/get/project")
-    public ResponseEntity<Project> getProject(
-            @Parameter(description = "User", required = true) @RequestParam("user") UUID userId,
-            @Parameter(description = "Project", required = true) @RequestParam("project") String projectName
-    ) {
-        User user = userService.get(userId);
-        if (user == null) {
-            return ResponseEntity.ofNullable(null);
-        }
-        Project project = projectService.getProject(user, projectName);
-        if (project == null) {
-            return ResponseEntity.ofNullable(null);
-        }
         return ResponseEntity.ok(project);
     }
 
     @Operation(summary = "получить проект")
-    @PostMapping("/get/projects")
-    public ResponseEntity<List<String>> getProjects(
+    @PostMapping("/get")
+    public ResponseEntity<List<Project>> getProjects(
             @Parameter(description = "User", required = true) @RequestParam("user") UUID userId
     ) {
         User user = userService.get(userId);
@@ -83,9 +65,7 @@ public class ProjectController {
         if (projects == null) {
             return ResponseEntity.ofNullable(null);
         }
-        List<String> projectNames = new ArrayList<>();
-        projects.forEach(project -> projectNames.add(project.getName()));
-        return ResponseEntity.ok(projectNames);
+        return ResponseEntity.ok(projects);
     }
 
     @Operation(summary = "создание нового проекта")

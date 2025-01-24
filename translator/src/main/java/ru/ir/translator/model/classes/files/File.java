@@ -26,4 +26,8 @@ public abstract class File {
         this.path = path;
         this.project = project;
     }
+
+    public String getAbsolutePath() {
+        return path + java.io.File.separator + name;
+    }
 }

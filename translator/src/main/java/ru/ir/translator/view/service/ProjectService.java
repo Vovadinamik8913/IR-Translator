@@ -26,12 +26,12 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public void addCode(Code code) {
-        codeRepository.save(code);
+    public Code addCode(Code code) {
+        return codeRepository.save(code);
     }
 
-    public void addRepresentation(Representation representation) {
-        representationRepository.save(representation);
+    public Representation addRepresentation(Representation representation) {
+        return representationRepository.save(representation);
     }
 
 

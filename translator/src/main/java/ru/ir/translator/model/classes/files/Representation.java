@@ -6,6 +6,7 @@ import lombok.Setter;
 import ru.ir.translator.model.classes.Project;
 import ru.ir.translator.model.classes.lang.Compiler;
 import ru.ir.translator.model.classes.lang.LLLanguage;
+import ru.ir.translator.model.classes.lang.Language;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +21,9 @@ public class Representation extends File {
     @ManyToOne @JoinColumn(name = "compiler_id")
     private Compiler compiler;
 
+    @OneToOne @JoinColumn(name = "code_id")
+    private Code code;
+
     @Transient
     private List<String> flags;
 
@@ -27,6 +31,14 @@ public class Representation extends File {
     private String specialFlags;
 
     public Representation() {}
+    public Representation(String name, String path, Project project,
+                          LLLanguage language, Compiler compiler, Code code, List<String> flags) {
+        super(name, path, project);
+        this.language = language;
+        this.compiler = compiler;
+        this.code = code;
+        this.flags = flags;
+    }
 
     @PostLoad
     private void fillTransient() {
