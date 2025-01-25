@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface CodeRepository extends JpaRepository<Code, Long> {
     Optional<Code> findByProject(Project project);
     Optional<List<Code>> findAllByProject(Project project);
+    void  deleteAllByProject(Project project);
 }

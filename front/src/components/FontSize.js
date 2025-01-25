@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../styles/Font.css';
 
 const FontSize = ({setFontSize}) => {
   const [isOpen, setIsOpen] = useState(false);   // Открытие/закрытие списка
@@ -27,34 +28,11 @@ const FontSize = ({setFontSize}) => {
 
       {/* Выпадающий список, рендерится при isOpen === true */}
       {isOpen && (
-        <div
-        
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            background: '#fff',
-            border: '1px solid #ccc',
-            padding: '4px',
-            zIndex: '1000',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-            cursor: 'pointer',
-            overflowY: 'auto',
-            height: '250px'
-          }}
-        >
+        <div className='font-overlay'>
           {fontSizes.map((size) => (
             <button
               key={size}
-              style={{
-                display: 'block',
-                width: '100%',
-                textAlign: 'left',
-                padding: '8px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer'
-              }}
+              className='font'
               onClick={() => handleFontSizeSelect(size)}
             >
               {size}

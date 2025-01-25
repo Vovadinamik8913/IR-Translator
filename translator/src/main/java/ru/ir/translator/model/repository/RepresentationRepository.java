@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RepresentationRepository extends JpaRepository<Representation, Long> {
-    Optional<Representation> findByProject(Project project);
+    Optional<Representation> findByProjectAndId(Project project, long id);
     Optional<List<Representation>> findAllByProject(Project project);
+    void  deleteAllByProject(Project project);
 }

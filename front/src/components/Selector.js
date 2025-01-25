@@ -11,11 +11,11 @@ const Selector = ({ onChange, elem, src, text }) => {
   const customStyles = {
     control: (provided, state) => ({
       ...provided,
-      width: '150px', // Установите желаемую ширину
+      width: '150px',
       minWidth: '150px',
       maxWidth: '150px',
       backgroundColor: '#3C3C3C',
-      color: '#fff', // Цвет текста внутри control
+      color: '#fff',
       borderColor: state.isFocused ? '#666' : '#444',
       boxShadow: state.isFocused ? '0 0 0 1px #666' : null,
       '&:hover': {
@@ -29,11 +29,11 @@ const Selector = ({ onChange, elem, src, text }) => {
     option: (provided, state) => ({
       ...provided,
       backgroundColor: state.isFocused
-        ? '#555' // Цвет фона при наведении на опцию
+        ? '#555'
         : '#3C3C3C',
-      color: '#fff', // Цвет текста опций
+      color: '#fff', 
       '&:active': {
-        backgroundColor: '#777', // Цвет фона при выборе опции
+        backgroundColor: '#777',
       },
     }),
     singleValue: (provided) => ({
@@ -41,21 +41,21 @@ const Selector = ({ onChange, elem, src, text }) => {
       whiteSpace: 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      color: '#fff', // Цвет выбранного значения
+      color: '#fff',
     }),
     placeholder: (provided) => ({
       ...provided,
       whiteSpace: 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      color: '#bbb', // Цвет текста placeholder
+      color: '#bbb',
     }),
     input: (provided) => ({
       ...provided,
       whiteSpace: 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      color: '#fff', // Цвет текста при вводе поиска
+      color: '#fff',
     }),
   };
   

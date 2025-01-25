@@ -15,21 +15,19 @@ const Projects = ({
   const [selectedProject, setSelectedProject] = useState("");
   const [projectFiles, setProjectFiles] = useState([]);
 
-  // Для создания нового проекта
-  const [newProjectName, setNewProjectName] = useState("");
 
-  // Для присвоения имени файлам при сохранении
+  const [newProjectName, setNewProjectName] = useState("");
   const [name, setName] = useState("");
 
   const token = localStorage.getItem("token");
   const user = localStorage.getItem("user");
-  // При первом рендере (или при смене user) — получаем список проектов
+
   useEffect(() => {
     if (!user) return;
     fetchProjects();
   }, [user]);
 
-  // Проверяем, авторизован ли пользователь (например, по наличию user в localStorage)
+  // Проверяем, авторизован ли пользователь
   if (!user) {
     return (
       <div className="projects-overlay">
@@ -129,8 +127,7 @@ const Projects = ({
       setProjectFiles([]);
     }
   };
-  // Обработчик "клика по файлу" — по желанию можно сделать, 
-  // чтобы при нажатии подгружалось содержимое файла и т.д.
+  // Обработчик "клика по файлу"
   const handleFileClick = async (fileId) => {
     try {
       setIsLoading(true);
@@ -237,6 +234,62 @@ const Projects = ({
     }
   };
 
+  // Удаление проекта
+  const handleDeleteProject = async () => {
+    if (!selectedProject) return;
+    setIsLoading(true);
+    try {
+      const project = projects.find((p) => p.id === Number(selectedProject));
+      const formData = new FormData();
+      formData.append('user', user); 
+      formData.append('project', project.name);
+      const response = await fetch("/project/delete",{
+        method: "POST",
+        headers: {
+          'Authorization': 'Bearer ' + token
+        },
+        body: formData,
+      });
+      if (!response.ok) throw new Error("Не удалось удалить проект");
+      // Обновляем список проектов в памяти
+      setProjects(projects.filter((p) => p.id !== Number(selectedProject)));
+      // Сбрасываем выбранный проект и файлы
+      setSelectedProject('');
+      setProjectFiles([]);
+    } catch (error) {
+      console.error('Ошибка при удалении проекта:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Удаление файла
+  const handleDeleteFile = async (fileId) => {
+    setIsLoading(true);
+    try {
+      const project = projects.find((p) => p.id === Number(selectedProject));
+      const formData = new FormData();
+      formData.append('user', user); 
+      formData.append('project', project.name);
+      formData.append('file', Number(fileId));
+      const response = await fetch("/file/delete",{
+        method: "POST",
+        headers: {
+          'Authorization': 'Bearer ' + token
+        },
+        body: formData,
+      });
+      if (!response.ok) throw new Error("Не удалось удалить файлы");
+      // Удаляем файл из локального состояния
+      setProjectFiles(projectFiles.filter((file) => file.id !== fileId));
+    } catch (error) {
+      console.error('Ошибка при удалении файла:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   return (
     <div className="projects-overlay">
       <div className="projects-modal">
@@ -267,6 +320,14 @@ const Projects = ({
               </option>
             ))}
           </select>
+          {/* Кнопка Удалить проект (появляется при выборе проекта) */}
+          {selectedProject && (
+            <div>
+              <button onClick={handleDeleteProject}>
+                Удалить проект
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Список файлов (кнопками) при выборе проекта */}
@@ -275,12 +336,18 @@ const Projects = ({
             <h3>Файлы проекта:</h3>
             <div className='files'>
               {projectFiles.map((file) => (
-                <button
-                  key={file.id}
-                  onClick={() => handleFileClick(file.id)}
-                >
-                  {`Название: ${file.name} | Язык: ${file.codeLang} | Представление: ${file.reprLang} | Компилятор: ${file.compiler} | Флаги: ${file.specialFlags}`}
-                </button>
+                <div>
+                  <button
+                    key={file.id}
+                    onClick={() => handleFileClick(file.id)}
+                  >
+                    {`Название: ${file.name} | Язык: ${file.codeLang} | Представление: ${file.reprLang} | Компилятор: ${file.compiler} | Флаги: ${file.specialFlags}`}
+                  </button>
+                  <button
+                    style={{ marginLeft: '8px' }}
+                    onClick={() => handleDeleteFile(file.id)}
+                  > x </button>
+                </div>
               ))}
             </div>
           </div>
@@ -297,8 +364,8 @@ const Projects = ({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
+              <button onClick={handleSaveToProject}>Сохранить</button>
             </div>
-            <button onClick={handleSaveToProject}>Сохранить</button>
           </div>
         )}
 

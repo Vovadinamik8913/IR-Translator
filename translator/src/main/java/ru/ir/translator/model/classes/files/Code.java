@@ -17,7 +17,7 @@ public class Code extends File {
     @Setter
     private Language language;
 
-    @OneToOne(mappedBy = "code")
+    @OneToOne(mappedBy = "code", cascade = CascadeType.ALL)
     private Representation representation;
 
     public Code() {}

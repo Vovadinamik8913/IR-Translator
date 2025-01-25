@@ -14,24 +14,16 @@ import ru.ir.translator.model.repository.RepresentationRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
-    private final CodeRepository codeRepository;
-    private final RepresentationRepository representationRepository;
 
     public Project createProject(Project project) {
         return projectRepository.save(project);
-    }
-
-    public Code addCode(Code code) {
-        return codeRepository.save(code);
-    }
-
-    public Representation addRepresentation(Representation representation) {
-        return representationRepository.save(representation);
     }
 
 
@@ -44,34 +36,22 @@ public class ProjectService {
         return projectRepository.findAllByUser(user).orElse(new ArrayList<>());
     }
 
-    @Nullable
-    public Code getCode(Code code) {
-        return codeRepository.findById(code.getId()).orElse(null);
-    }
-
-    @Nullable
-    public Representation getRepresentation(Representation representation) {
-        return representationRepository.findById(representation.getId()).orElse(null);
-    }
-
-    public List<Code> getCodes(Project project) {
-        return codeRepository.findAllByProject(project).orElse(new ArrayList<>());
-    }
-
-    public List<Representation> getRepresentations(Project project) {
-        return representationRepository.findAllByProject(project).orElse(new ArrayList<>());
-    }
-
     @Transactional
-    public void deleteProject(User user, String name) {
-        projectRepository.deleteByUserAndName(user, name);
+    public void deleteProject(Project project) {
+        projectRepository.delete(project);
     }
 
-    public void deleteCode(Code code) {
-        codeRepository.deleteById(code.getId());
+    public long getWithSameName(User user, String projectName) {
+        List<Project> projects = getProjects(user);
+        Pattern special = Pattern.compile("^" + projectName + "(\\(\\d+\\))?$");
+        long cnt = 0;
+        for (Project project : projects) {
+            Matcher hasSame = special.matcher(project.getName());
+            if (hasSame.matches()) {
+                cnt++;
+            }
+        }
+        return cnt;
     }
 
-    public void deleteRepresentation(Representation representation) {
-        representationRepository.deleteById(representation.getId());
-    }
 }

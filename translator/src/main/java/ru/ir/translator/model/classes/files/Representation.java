@@ -21,7 +21,7 @@ public class Representation extends File {
     @ManyToOne @JoinColumn(name = "compiler_id")
     private Compiler compiler;
 
-    @OneToOne @JoinColumn(name = "code_id")
+    @OneToOne(cascade = CascadeType.ALL) @JoinColumn(name = "code_id")
     private Code code;
 
     @Transient

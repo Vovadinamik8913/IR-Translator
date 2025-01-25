@@ -18,6 +18,7 @@ import ru.ir.translator.model.classes.lang.Compiler;
 import ru.ir.translator.model.classes.lang.LLLanguage;
 import ru.ir.translator.model.classes.lang.Language;
 import ru.ir.translator.request.FileResponse;
+import ru.ir.translator.view.service.FileService;
 import ru.ir.translator.view.service.LangService;
 import ru.ir.translator.view.service.ProjectService;
 import ru.ir.translator.view.service.UserService;
@@ -38,6 +39,7 @@ public class FileController {
     private final UserService userService;
     private final ProjectService projectService;
     private final LangService langService;
+    private final FileService fileService;
 
     private void create(byte[] src, String path) throws IOException {
         File file = new File(path);
@@ -94,25 +96,29 @@ public class FileController {
                 + File.separator + user.getUuid()
                 + File.separator + projectName;
 
+        String filename = name;
+        long cnt = fileService.getWithSameName(project, name);
+        if (cnt > 0) {
+            filename += "(" + cnt + ")";
+        }
         Code fileCode = new Code(
-                name + language.getLang().getExtension(),
+                filename + language.getLang().getExtension(),
                 path,
                 project,
                 language
             );
 
-        File codeFile = new File(fileCode.getPath() + File.separator + fileCode.getName());
         try {
-            create(code.getBytes(), codeFile.getAbsolutePath());
+            create(code.getBytes(), fileCode.getAbsolutePath());
         } catch (IOException e) {
             System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
-        projectService.addCode(fileCode);
+        fileService.addCode(fileCode);
 
 
         Representation fileRepr = new Representation(
-                name + llLanguage.getType().getExtension(),
+                filename + llLanguage.getType().getExtension(),
                 path,
                 project,
                 llLanguage,
@@ -126,7 +132,7 @@ public class FileController {
             System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
-        fileRepr = projectService.addRepresentation(fileRepr);
+        fileRepr = fileService.addRepresentation(fileRepr);
 
         FileResponse fileResponse = new FileResponse();
         fileResponse.setId(fileRepr.getId());
@@ -156,7 +162,7 @@ public class FileController {
         }
 
         List<FileResponse> res = new ArrayList<>();
-        List<Representation> representations = projectService.getRepresentations(project);
+        List<Representation> representations = fileService.getRepresentations(project);
 
         for (Representation representation : representations) {
             FileResponse fileResponse = new FileResponse(
@@ -189,12 +195,7 @@ public class FileController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Representation> representations = projectService.getRepresentations(project);
-        if (representations.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        Representation representation = representations.stream()
-                .filter(repr -> repr.getId() == id).findFirst().orElse(null);
+        Representation representation = fileService.getRepresentation(project, id);
         if (representation == null) {
             return ResponseEntity.notFound().build();
         }
@@ -219,5 +220,39 @@ public class FileController {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(fileResponse);
+    }
+
+    @Operation(summary = "удалить файлы")
+    @PostMapping("/delete")
+    public ResponseEntity<?> delete(
+            @Parameter(description = "User", required = true) @RequestParam("user") UUID userId,
+            @Parameter(description = "Project") @RequestParam("project") String projectName,
+            @Parameter(description = "File") @RequestParam("file") int id
+    ){
+        User user = userService.get(userId);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Project project = projectService.getProject(user, projectName);
+        if (project == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Representation representation = fileService.getRepresentation(project, id);
+        if (representation == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        File file = new File(representation.getCode().getAbsolutePath());
+        if (file.exists()) {
+            file.delete();
+        }
+        file = new File(representation.getAbsolutePath());
+        if (file.exists()) {
+            file.delete();
+        }
+        Code code = representation.getCode();
+        fileService.deleteRepresentation(representation);
+        fileService.deleteCode(code);
+        return ResponseEntity.ok().build();
     }
 }

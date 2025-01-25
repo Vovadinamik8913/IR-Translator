@@ -10,7 +10,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 2000;
 }
 
 .projects-modal {
@@ -20,7 +20,7 @@
     border-radius: 8px;
     position: relative;
     width: 70%;
-    height: 70%;
+    height: 75%;
     max-width: 90%;
     align-items: center;
 }

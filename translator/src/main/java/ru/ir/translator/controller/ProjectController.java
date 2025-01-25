@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.ir.translator.LocalConfig;
 import ru.ir.translator.model.classes.Project;
 import ru.ir.translator.model.classes.User;
+import ru.ir.translator.view.service.FileService;
 import ru.ir.translator.view.service.ProjectService;
 import ru.ir.translator.view.service.UserService;
 
@@ -26,6 +27,7 @@ import java.util.UUID;
 public class ProjectController {
     private final ProjectService projectService;
     private final UserService userService;
+    private final FileService fileService;
 
     @Operation(summary = "создание нового проекта")
     @PostMapping("/create")
@@ -37,7 +39,12 @@ public class ProjectController {
         if (user == null) {
             return ResponseEntity.ofNullable(null);
         }
-        Project project = new Project(projectName, user);
+        long cnt = projectService.getWithSameName(user, projectName);
+        String name = projectName;
+        if (cnt > 0) {
+            name += "(" + cnt + ")";
+        }
+        Project project = new Project(name, user);
         project = projectService.createProject(project);
         if (project == null) {
             return ResponseEntity.ofNullable(null);
@@ -70,15 +77,24 @@ public class ProjectController {
 
     @Operation(summary = "создание нового проекта")
     @PostMapping("/delete")
-    public void deleteProject(
+    public ResponseEntity<?> deleteProject(
             @Parameter(description = "User", required = true) @RequestParam("user") UUID userId,
             @Parameter(description = "Project", required = true) @RequestParam("project") String projectName
     ) {
         User user = userService.get(userId);
         if (user == null) {
-            return;
+            return ResponseEntity.badRequest().build();
         }
-        projectService.deleteProject(user, projectName);
+        Project project = projectService.getProject(user, projectName);
+        if (project == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        fileService.deleteRepresentations(project);
+        fileService.deleteCodes(project);
+
+
+        projectService.deleteProject(project);
 
         String path = LocalConfig.getInstance().getWorkPath()
                 + File.separator + user.getUuid()
@@ -92,5 +108,6 @@ public class ProjectController {
                 System.out.println(e.getMessage());
             }
         }
+        return ResponseEntity.ok().build();
     }
 }
