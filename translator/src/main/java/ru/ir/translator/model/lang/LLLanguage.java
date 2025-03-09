@@ -1,0 +1,31 @@
+package ru.ir.translator.model.lang;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+
+@Entity
+@Getter
+public class LLLanguage {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    @Transient
+    private LLLang type;
+
+    @Basic
+    private String name;
+
+    @PostLoad
+    private void fillTransient() {
+        if (name != null && !name.isEmpty()) {
+            this.type = LLLang.of(name);
+        }
+    }
+
+    @PrePersist
+    private void fillPersistent() {
+        if (type != null) {
+            this.name = type.getName();
+        }
+    }
+}

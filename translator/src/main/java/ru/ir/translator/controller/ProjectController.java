@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ir.translator.LocalConfig;
-import ru.ir.translator.model.classes.Project;
-import ru.ir.translator.model.classes.User;
-import ru.ir.translator.view.service.ProjectService;
-import ru.ir.translator.view.service.UserService;
+import ru.ir.translator.model.Project;
+import ru.ir.translator.model.User;
+import ru.ir.translator.service.FileService;
+import ru.ir.translator.service.ProjectService;
+import ru.ir.translator.service.UserService;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,10 +27,11 @@ import java.util.UUID;
 public class ProjectController {
     private final ProjectService projectService;
     private final UserService userService;
+    private final FileService fileService;
 
     @Operation(summary = "создание нового проекта")
     @PostMapping("/create")
-    public ResponseEntity<Long> createProject(
+    public ResponseEntity<Project> createProject(
             @Parameter(description = "User", required = true) @RequestParam("user") UUID userId,
             @Parameter(description = "Project", required = true) @RequestParam("project") String projectName
     ) {
@@ -38,7 +39,12 @@ public class ProjectController {
         if (user == null) {
             return ResponseEntity.ofNullable(null);
         }
-        Project project = new Project(projectName, user);
+        long cnt = projectService.getWithSameName(user, projectName);
+        String name = projectName;
+        if (cnt > 0) {
+            name += "(" + cnt + ")";
+        }
+        Project project = new Project(name, user);
         project = projectService.createProject(project);
         if (project == null) {
             return ResponseEntity.ofNullable(null);
@@ -50,29 +56,12 @@ public class ProjectController {
         if (!projectDir.exists()) {
             projectDir.mkdirs();
         }
-        return ResponseEntity.ok(project.getId());
-    }
-
-    @Operation(summary = "получить проект")
-    @PostMapping("/get/project")
-    public ResponseEntity<Project> getProject(
-            @Parameter(description = "User", required = true) @RequestParam("user") UUID userId,
-            @Parameter(description = "Project", required = true) @RequestParam("project") String projectName
-    ) {
-        User user = userService.get(userId);
-        if (user == null) {
-            return ResponseEntity.ofNullable(null);
-        }
-        Project project = projectService.getProject(user, projectName);
-        if (project == null) {
-            return ResponseEntity.ofNullable(null);
-        }
         return ResponseEntity.ok(project);
     }
 
     @Operation(summary = "получить проект")
-    @PostMapping("/get/projects")
-    public ResponseEntity<List<String>> getProjects(
+    @PostMapping("/get")
+    public ResponseEntity<List<Project>> getProjects(
             @Parameter(description = "User", required = true) @RequestParam("user") UUID userId
     ) {
         User user = userService.get(userId);
@@ -83,22 +72,29 @@ public class ProjectController {
         if (projects == null) {
             return ResponseEntity.ofNullable(null);
         }
-        List<String> projectNames = new ArrayList<>();
-        projects.forEach(project -> projectNames.add(project.getName()));
-        return ResponseEntity.ok(projectNames);
+        return ResponseEntity.ok(projects);
     }
 
     @Operation(summary = "создание нового проекта")
     @PostMapping("/delete")
-    public void deleteProject(
+    public ResponseEntity<?> deleteProject(
             @Parameter(description = "User", required = true) @RequestParam("user") UUID userId,
             @Parameter(description = "Project", required = true) @RequestParam("project") String projectName
     ) {
         User user = userService.get(userId);
         if (user == null) {
-            return;
+            return ResponseEntity.badRequest().build();
         }
-        projectService.deleteProject(user, projectName);
+        Project project = projectService.getProject(user, projectName);
+        if (project == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        fileService.deleteRepresentations(project);
+        fileService.deleteCodes(project);
+
+
+        projectService.deleteProject(project);
 
         String path = LocalConfig.getInstance().getWorkPath()
                 + File.separator + user.getUuid()
@@ -112,5 +108,6 @@ public class ProjectController {
                 System.out.println(e.getMessage());
             }
         }
+        return ResponseEntity.ok().build();
     }
 }
