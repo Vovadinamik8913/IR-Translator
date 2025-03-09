@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,10 +19,7 @@ import ru.ir.translator.model.files.Representation;
 import ru.ir.translator.model.lang.*;
 import ru.ir.translator.service.LangService;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public class TranslatorController {
         return compilerRepresentation;
     }
 
-    private void create(byte[] src, String name, String path) throws IOException {
+    private void create(InputStream stream, String name, String path) throws IOException {
         File file;
         if (!path.isEmpty()) {
             file = new File(path);
@@ -68,10 +68,14 @@ public class TranslatorController {
         if (!file.exists()) {
             file.createNewFile();
         }
-        BufferedOutputStream stream =
-                new BufferedOutputStream(new FileOutputStream(file));
-        stream.write(src);
-        stream.close();
+        OutputStream outputStream = new FileOutputStream(file);
+        byte[] buffer = new byte[8192];
+        int bytesRead;
+        while ((bytesRead = stream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, bytesRead);
+        }
+        outputStream.flush();
+        outputStream.close();
     }
 
     private void delete(String path, String name) throws IOException {
@@ -89,11 +93,11 @@ public class TranslatorController {
     }
 
     @Nullable
-    private byte[] translate(byte[] src, String fileName, String path,
+    private InputStreamResource translate(InputStream stream, String fileName, String path,
                              Language language, CompilerRepresentation compilerRepresentation,
                              List<String> flags) throws IOException {
-        byte[] bytes;
-        create(src, fileName, path);
+        InputStreamResource inputStream = null;
+        create(stream, fileName, path);
         Code code = new Code(fileName, path, null, language);
         Representation representation = CompilerExecution.compile(compilerRepresentation, code, flags);
         if (representation != null && representation.getLanguage().getType() == LLLang.JBC) {
@@ -120,10 +124,8 @@ public class TranslatorController {
         } else {
             file = new File(representation.getPath() + File.separator + representation.getName());
         }
-        bytes = Files.readAllBytes(file.toPath());
-        file.delete();
-        delete(representation.getPath(), "");
-        return  bytes;
+        inputStream = new InputStreamResource(new FileInputStream(file));
+        return inputStream;
     }
 
     private String getFilename(Lang language, MultipartFile file) {
@@ -137,7 +139,7 @@ public class TranslatorController {
 
     @Operation(summary = "Получение представления")
     @PostMapping
-    public ResponseEntity<byte[]> translate(
+    public ResponseEntity<InputStreamResource> translate(
             @Parameter(description = "Language") @RequestParam("language") String languageName,
             @Parameter(description = "Compiler", required = true) @RequestParam("compiler") String compilerName,
             @Parameter(description = "Representation", required = true) @RequestParam("representation") String representationName,
@@ -165,15 +167,21 @@ public class TranslatorController {
         }
         String fileName = getFilename(lang, file);
         fileName = fileName.replace("-", "_");
-        byte[] bytes;
+        InputStreamResource resource;
         try {
-            bytes = translate(file.getBytes(), fileName, path,
+            resource = translate(file.getInputStream(), fileName, path,
                     language, compilerRepresentation, List.of(flags));
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(bytes);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"");
+        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(new InputStreamResource(resource));
     }
 
 

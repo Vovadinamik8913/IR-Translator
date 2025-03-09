@@ -3,7 +3,12 @@ package ru.ir.translator.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,10 +28,7 @@ import ru.ir.translator.service.LangService;
 import ru.ir.translator.service.ProjectService;
 import ru.ir.translator.service.UserService;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,14 +43,18 @@ public class FileController {
     private final LangService langService;
     private final FileService fileService;
 
-    private void create(byte[] src, String path) throws IOException {
+    private void create(InputStream stream, String path) throws IOException {
         File file = new File(path);
         if (!file.exists()) {
             file.createNewFile();
-            BufferedOutputStream stream =
-                    new BufferedOutputStream(new FileOutputStream(file));
-            stream.write(src);
-            stream.close();
+            OutputStream outputStream = new FileOutputStream(file);
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = stream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            outputStream.flush();
+            outputStream.close();
         }
     }
 
@@ -109,7 +115,7 @@ public class FileController {
             );
 
         try {
-            create(code.getBytes(), fileCode.getAbsolutePath());
+            create(code.getInputStream(), fileCode.getAbsolutePath());
         } catch (IOException e) {
             System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -127,7 +133,7 @@ public class FileController {
                 List.of(flags)
         );
         try {
-            create(representation.getBytes(), fileRepr.getAbsolutePath());
+            create(representation.getInputStream(), fileRepr.getAbsolutePath());
         } catch (IOException e) {
             System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -180,7 +186,7 @@ public class FileController {
 
     @Operation(summary = "импортировать файлы")
     @PostMapping("/load")
-    public ResponseEntity<FileResponse> load(
+    public ResponseEntity<MultiValueMap<String, Object>> load(
             @Parameter(description = "User", required = true) @RequestParam("user") UUID userId,
             @Parameter(description = "Project") @RequestParam("project") String projectName,
             @Parameter(description = "File") @RequestParam("file") int id
@@ -200,7 +206,9 @@ public class FileController {
             return ResponseEntity.notFound().build();
         }
 
-        FileResponse fileResponse = new FileResponse(
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+
+        FileResponse metadata = new FileResponse(
                 representation.getId(),
                 representation.getName().substring(0, representation.getName().lastIndexOf(".")),
                 representation.getCode().getLanguage().getName(),
@@ -209,17 +217,20 @@ public class FileController {
                 representation.getSpecialFlags()
         );
 
-        byte[] file;
+        parts.add("metadata", metadata);
         try {
-            file = Files.readAllBytes(new File(representation.getCode().getAbsolutePath()).toPath());
-            fileResponse.setCode(file);
-            file = Files.readAllBytes(new File(representation.getAbsolutePath()).toPath());
-            fileResponse.setRepresentation(file);
+            File codeFile = new File(representation.getCode().getAbsolutePath());
+            File reprFile = new File(representation.getAbsolutePath());
+
+            parts.add("code", new InputStreamResource(new FileInputStream(codeFile)));
+            parts.add("representation", new InputStreamResource(new FileInputStream(reprFile)));
         } catch (IOException e) {
             System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(fileResponse);
+        return ResponseEntity.ok()
+                .contentType(MediaType.MULTIPART_MIXED)
+                .body(parts);
     }
 
     @Operation(summary = "удалить файлы")
