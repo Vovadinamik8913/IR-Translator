@@ -1,4 +1,4 @@
-package ru.ir.translator.model.classes;
+package ru.ir.translator.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;

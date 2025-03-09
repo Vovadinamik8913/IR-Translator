@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ir.translator.logic.CompilerExecution;
-import ru.ir.translator.model.classes.files.Code;
-import ru.ir.translator.model.classes.files.Representation;
-import ru.ir.translator.model.classes.lang.*;
-import ru.ir.translator.view.service.LangService;
+import ru.ir.translator.model.files.Code;
+import ru.ir.translator.model.files.Representation;
+import ru.ir.translator.model.lang.*;
+import ru.ir.translator.service.LangService;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -90,8 +90,8 @@ public class TranslatorController {
 
     @Nullable
     private byte[] translate(byte[] src, String fileName, String path,
-                                 Language language, CompilerRepresentation compilerRepresentation,
-                                 List<String> flags) throws IOException {
+                             Language language, CompilerRepresentation compilerRepresentation,
+                             List<String> flags) throws IOException {
         byte[] bytes;
         create(src, fileName, path);
         Code code = new Code(fileName, path, null, language);

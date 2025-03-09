@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ir.translator.model.classes.lang.*;
-import ru.ir.translator.view.service.LangService;
+import ru.ir.translator.model.lang.*;
+import ru.ir.translator.service.LangService;
 
 import java.util.ArrayList;
 import java.util.List;

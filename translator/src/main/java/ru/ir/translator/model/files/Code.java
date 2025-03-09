@@ -1,14 +1,10 @@
-package ru.ir.translator.model.classes.files;
+package ru.ir.translator.model.files;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import ru.ir.translator.model.classes.Project;
-import ru.ir.translator.model.classes.lang.Compiler;
-import ru.ir.translator.model.classes.lang.CompilerRepresentation;
-import ru.ir.translator.model.classes.lang.Language;
-
-import java.util.List;
+import ru.ir.translator.model.Project;
+import ru.ir.translator.model.lang.Language;
 
 @Entity
 @Getter

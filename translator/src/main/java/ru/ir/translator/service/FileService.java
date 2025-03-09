@@ -1,15 +1,14 @@
-package ru.ir.translator.view.service;
+package ru.ir.translator.service;
 
 import jakarta.annotation.Nullable;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.ir.translator.model.classes.Project;
-import ru.ir.translator.model.classes.User;
-import ru.ir.translator.model.classes.files.Code;
-import ru.ir.translator.model.classes.files.Representation;
-import ru.ir.translator.model.repository.CodeRepository;
-import ru.ir.translator.model.repository.RepresentationRepository;
+import ru.ir.translator.model.Project;
+import ru.ir.translator.model.files.Code;
+import ru.ir.translator.model.files.Representation;
+import ru.ir.translator.repository.CodeRepository;
+import ru.ir.translator.repository.RepresentationRepository;
 
 import java.util.ArrayList;
 import java.util.List;

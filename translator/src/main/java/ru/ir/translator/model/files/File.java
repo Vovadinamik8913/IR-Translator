@@ -1,10 +1,9 @@
-package ru.ir.translator.model.classes.files;
+package ru.ir.translator.model.files;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import ru.ir.translator.model.classes.lang.Compiler;
-import ru.ir.translator.model.classes.Project;
+import ru.ir.translator.model.Project;
 
 @MappedSuperclass
 @Getter

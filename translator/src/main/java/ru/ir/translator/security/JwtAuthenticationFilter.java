@@ -12,11 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.ir.translator.model.classes.User;
-import ru.ir.translator.view.service.UserService;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor

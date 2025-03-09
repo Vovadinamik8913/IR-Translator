@@ -1,4 +1,4 @@
-package ru.ir.translator.model.classes.lang;
+package ru.ir.translator.model.lang;
 
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;

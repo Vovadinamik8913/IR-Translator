@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ir.translator.LocalConfig;
-import ru.ir.translator.model.classes.User;
-import ru.ir.translator.request.LogResponse;
+import ru.ir.translator.model.User;
+import ru.ir.translator.controller.request.LogResponse;
 import ru.ir.translator.security.JwtService;
-import ru.ir.translator.view.service.UserService;
+import ru.ir.translator.service.UserService;
 
 import java.io.File;
 

@@ -1,4 +1,4 @@
-package ru.ir.translator.request;
+package ru.ir.translator.controller.request;
 
 import lombok.Getter;
 import lombok.Setter;

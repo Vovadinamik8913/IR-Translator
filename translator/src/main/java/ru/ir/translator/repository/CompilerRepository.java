@@ -1,9 +1,8 @@
-package ru.ir.translator.model.repository;
+package ru.ir.translator.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.ir.translator.model.classes.lang.Compiler;
-import ru.ir.translator.model.classes.lang.LLLanguage;
-import ru.ir.translator.model.classes.lang.Language;
+import ru.ir.translator.model.lang.Compiler;
+import ru.ir.translator.model.lang.Language;
 
 import java.util.List;
 import java.util.Optional;

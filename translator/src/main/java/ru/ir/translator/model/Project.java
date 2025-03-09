@@ -1,12 +1,11 @@
-package ru.ir.translator.model.classes;
+package ru.ir.translator.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
-import ru.ir.translator.model.classes.files.Code;
-import ru.ir.translator.model.classes.files.Representation;
+import ru.ir.translator.model.files.Code;
+import ru.ir.translator.model.files.Representation;
 
 import java.util.List;
 

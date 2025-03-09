@@ -1,10 +1,10 @@
 package ru.ir.translator.logic;
 
 import jakarta.annotation.Nullable;
-import ru.ir.translator.model.classes.files.Code;
-import ru.ir.translator.model.classes.files.Representation;
-import ru.ir.translator.model.classes.lang.Compiler;
-import ru.ir.translator.model.classes.lang.CompilerRepresentation;
+import ru.ir.translator.model.files.Code;
+import ru.ir.translator.model.files.Representation;
+import ru.ir.translator.model.lang.Compiler;
+import ru.ir.translator.model.lang.CompilerRepresentation;
 
 import java.io.File;
 import java.io.IOException;
