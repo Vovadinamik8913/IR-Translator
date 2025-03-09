@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import '../styles/Login.css'; // Стили для модального окна
+import '../styles/Login.css';
+import { loginSite, registrationSite } from '../api/login-api';
 
 const Login = ({ onClose }) => {
-    const [isLogin, setIsLogin] = useState(true); // Состояние для переключения между входом и регистрацией
-    const [email, setEmail] = useState(''); // Email пользователя (только для регистрации)
-    const [login, setLogin] = useState(''); // Логин
-    const [password, setPassword] = useState(''); // Пароль
-    const [errorMessage, setErrorMessage] = useState(''); // Сообщение об ошибке
-    const [successMessage, setSuccessMessage] = useState(''); // Сообщение об успехе
+    const [isLogin, setIsLogin] = useState(true); 
+    const [email, setEmail] = useState('');
+    const [login, setLogin] = useState('');
+    const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
 
     const toggleModal = () => {
-        setIsLogin(!isLogin); // Переключаем режим
-        setErrorMessage(''); // Сбрасываем сообщения при переключении
-        setSuccessMessage('');// Очищаем поля при переключении
+        setIsLogin(!isLogin);
+        setErrorMessage('');
+        setSuccessMessage('');
         setEmail('');
         setLogin('');
         setPassword('');
@@ -22,66 +23,30 @@ const Login = ({ onClose }) => {
         event.preventDefault();
 
         if (isLogin) {
-            // Запрос на вход
             try {
-                const buildFormData = new FormData();
-                buildFormData.append("login", login);
-                buildFormData.append("password", password);
-                const response = await fetch('/user/login', {
-                    method: 'POST',
-                    body: buildFormData
-                });
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Если вход успешен
-                    setSuccessMessage('Вход выполнен успешно!');
-                    setErrorMessage('');
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', data.uuid);
-                    // Закрываем модальное окно или перенаправляем пользователя
-                    onClose();
-                } else {
-                    // Если произошла ошибка
-                    setErrorMessage(data.message || 'Ошибка при входе. Проверьте логин и пароль.');
-                    setSuccessMessage('');
-                }
+                const data = await loginSite(login, password);
+                setSuccessMessage('Вход выполнен успешно!');
+                setErrorMessage('');
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', data.uuid);
+                onClose();
             } catch (error) {
                 console.error('Ошибка при выполнении входа:', error);
-                setErrorMessage('Произошла ошибка при попытке входа.');
+                setErrorMessage('Ошибка при входе. Проверьте логин и пароль.');
                 setSuccessMessage('');
             }
         } else {
-            // Запрос на регистрацию
             try {
-                const buildFormData = new FormData();
-                buildFormData.append("login", login);
-                buildFormData.append("password", password);
-                buildFormData.append("email", email);
-                const response = await fetch('/user/registration', {
-                    method: 'POST',
-                    body: buildFormData
-                });
-                console.log(response);
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Если регистрация успешна
-                    setSuccessMessage('Регистрация прошла успешно!');
-                    setErrorMessage('');
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', data.uuid);
-                    // Переключаемся на режим входа или закрываем модальное окно
-                    setIsLogin(true);
-                    onClose();
-                } else {
-                    // Если произошла ошибка
-                    setErrorMessage(data.message || 'Ошибка при регистрации. Попробуйте снова.');
-                    setSuccessMessage('');
-                }
+                const data = await registrationSite(login, password, email);
+                setSuccessMessage('Регистрация прошла успешно!');
+                setErrorMessage('');
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', data.uuid);
+                setIsLogin(true);
+                onClose();
             } catch (error) {
                 console.error('Ошибка при выполнении регистрации:', error);
-                setErrorMessage('Произошла ошибка при попытке регистрации.');
+                setErrorMessage('Ошибка при регистрации. Попробуйте снова.');
                 setSuccessMessage('');
             }
         }

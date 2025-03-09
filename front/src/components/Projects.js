@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Project.css';
+import { deleteFile, deleteProject, getFiles, getProjects, saveFiles, createProject, selectProject } from '../api/projects-api';
 
 const Projects = ({
   code, setCode,
@@ -27,7 +28,6 @@ const Projects = ({
     fetchProjects();
   }, [user]);
 
-  // Проверяем, авторизован ли пользователь
   if (!user) {
     return (
       <div className="projects-overlay">
@@ -42,19 +42,7 @@ const Projects = ({
   const fetchProjects = async () => {
     try {
       setIsLoading(true);
-      const formData = new FormData();
-      formData.append('user', user); 
-      // Замените URL и параметры запроса на ваши
-      const response = await fetch("/project/get", {
-        method: "POST",
-        headers: {
-          'Authorization': 'Bearer ' + token
-        },
-        body: formData,
-      });
-      if (!response.ok) throw new Error("Ошибка при загрузке проектов");
-      const data = await response.json();
-      // Предположим, что data — массив объектов { id, name }
+      const data = await getProjects(user, token);
       setProjects(data);
     } catch (error) {
       console.error(error);
@@ -70,20 +58,7 @@ const Projects = ({
     }
     try {
       setIsLoading(true);
-      // Замените URL и метод запроса на ваши
-      const formData = new FormData();
-      formData.append('user', user); // Предполагается, что расширение соответствует языку
-      formData.append('project', newProjectName);
-      const response = await fetch("/project/create", {
-        method: "POST",
-        headers: {
-          'Authorization': 'Bearer ' + token
-        },
-        body: formData,
-      });
-      if (!response.ok) throw new Error("Не удалось создать проект");
-      const createdProject = await response.json();
-      // Обновим список проектов в state
+      const createdProject = await createProject(user, newProjectName, token);
       setProjects((prev) => [...prev, createdProject]);
       setNewProjectName("");
     } catch (error) {
@@ -93,30 +68,15 @@ const Projects = ({
     }
   };
 
-  // Выбор текущего проекта из селекта
   const handleSelectProject = async (e) => {
     const projectId = e.target.value;
     setSelectedProject(projectId);
     if (projectId) {
       try {
         setIsLoading(true);
-        // Ищем в списке projects нужный объект чтобы узнать его name
         const project = projects.find((p) => p.id === Number(projectId));
         if (!project) return;
-        const formData = new FormData();
-        formData.append('user', user); 
-        formData.append('project', project.name);
-        const response = await fetch("/file/get",{
-          method: "POST",
-          headers: {
-            'Authorization': 'Bearer ' + token
-          },
-          body: formData,
-        });
-        if (!response.ok) throw new Error("Не удалось загрузить файлы");
-        const data = await response.json();
-        // Предположим, что data — массив файлов
-        // { id, name, language, representation, flags}
+        const data = await selectProject(user, project.name, token);
         setProjectFiles(data);
       } catch (error) {
         console.error(error);
@@ -127,7 +87,7 @@ const Projects = ({
       setProjectFiles([]);
     }
   };
-  // Обработчик "клика по файлу"
+  
   const handleFileClick = async (fileId) => {
     try {
       setIsLoading(true);
@@ -136,57 +96,70 @@ const Projects = ({
         alert("Некорректный проект");
         return;
       }
-      const formData = new FormData();
-      formData.append('user', user); 
-      formData.append('project', project.name);
-      formData.append('file', Number(fileId));
-      const response = await fetch("/file/load",{
-        method: "POST",
-        headers: {
-          'Authorization': 'Bearer ' + token
-        },
-        body: formData,
-      });
-      if (!response.ok) throw new Error("Не удалось загрузить файлы");
-      const data = await response.json();
-      setLanguage(data.codeLang);
-      setCompiler(data.compiler);
-      setReprLanguage(data.reprLang);
-      setFlags(data.specialFlags);
-      setCode(toString(data.code));
-      setRepresentation(toString(data.representation));
+      const data = await getFiles(user, project.name, Number(fileId), token);
+      const parts = await parseMultipartResponse(data.buffer, data.boundary);
+      console.log(parts);
+      const metadata = JSON.parse(await parts.metadata.body.text());
+      const codeBlob = await parts.code.body.text();
+      const reprBlob = await parts.representation.body.text();
+      setLanguage(metadata.codeLang);
+      setCompiler(metadata.compiler);
+      setReprLanguage(metadata.reprLang);
+      setFlags(metadata.specialFlags);
+      setCode(await codeBlob);
+      setRepresentation(await reprBlob);
     } catch (error) {
       console.error(error);
     } finally {
       setIsLoading(false);
     }
-
   };
 
-  // Функция для преобразования строки Base64 в текст
-  const toString = (base64) => {
-    // Декодируем строку Base64
-    const binaryString = window.atob(base64);
-  
-    // Создаем массив байтов из бинарной строки
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-  
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+  async function parseMultipartResponse(arrayBuffer, boundary) {
+    const parts = {};
+    const decoder = new TextDecoder();
+    const textData = decoder.decode(arrayBuffer);
+    
+    // Удаляем закрывающий boundary
+    const cleanedData = textData.replace(`--${boundary}--`, '');
+    const partsBytes = cleanedData.split(`--${boundary}`);
+    
+    for (const part of partsBytes) {
+        const trimmedPart = part.trim();
+        if (!trimmedPart) continue;
+
+        const [headerSection, ...bodyParts] = trimmedPart.split('\r\n\r\n');
+        const body = bodyParts.join('\r\n\r\n').trim();
+        
+        // Парсим заголовки
+        const headers = new Headers();
+        headerSection.split('\r\n').forEach(line => {
+            const [name, value] = line.split(': ');
+            if (name && value) headers.set(name.toLowerCase(), value);
+        });
+
+        // Извлекаем имя части
+        const contentDisposition = headers.get('content-disposition');
+        const nameMatch = contentDisposition?.match(/name="(.*?)"/i);
+        if (!nameMatch) continue;
+
+        const name = nameMatch[1];
+        parts[name] = {
+            headers,
+            body: new Blob([new TextEncoder().encode(body)], { 
+                type: headers.get('content-type') || 'application/octet-stream' 
+            })
+        };
     }
-  
-    // Преобразуем массив байтов в строку с использованием TextDecoder
-    const decoder = new TextDecoder('utf-8');
-    return decoder.decode(bytes);
-  }
+    
+    return parts;
+}
 
   const handleSaveToProject = async () => {
     if (!selectedProject) {
       alert("Сначала выберите проект");
       return;
     }
-    // Ищем выбранный проект из стейта, чтобы передать projectName
     const project = projects.find((p) => p.id === Number(selectedProject));
     if (!project) {
       alert("Некорректный проект");
@@ -213,19 +186,7 @@ const Projects = ({
       formData.append('flags', flags.split(" "));
       formData.append('code', codeFile);
       formData.append('representation', reprFile);
-      // Пример отправки: возможно, вам нужно передавать файлы как FormData.
-      // Здесь показано отправкой JSON (зависит от вашего сервера).
-      const response = await fetch("/file/save", {
-        method: "POST",
-        headers: {
-          'Authorization': 'Bearer ' + token
-        },
-        body: formData,
-      });
-      if (!response.ok) throw new Error("Не удалось сохранить файлы");
-      const result = await response.json();
-      console.log(result);
-      // Можно обновить список файлов
+      await saveFiles(formData, token);
       handleSelectProject({ target: { value: selectedProject } });
     } catch (error) {
       console.error(error);
@@ -234,26 +195,13 @@ const Projects = ({
     }
   };
 
-  // Удаление проекта
   const handleDeleteProject = async () => {
     if (!selectedProject) return;
     setIsLoading(true);
     try {
       const project = projects.find((p) => p.id === Number(selectedProject));
-      const formData = new FormData();
-      formData.append('user', user); 
-      formData.append('project', project.name);
-      const response = await fetch("/project/delete",{
-        method: "POST",
-        headers: {
-          'Authorization': 'Bearer ' + token
-        },
-        body: formData,
-      });
-      if (!response.ok) throw new Error("Не удалось удалить проект");
-      // Обновляем список проектов в памяти
+      await deleteProject(user, project.name, token);
       setProjects(projects.filter((p) => p.id !== Number(selectedProject)));
-      // Сбрасываем выбранный проект и файлы
       setSelectedProject('');
       setProjectFiles([]);
     } catch (error) {
@@ -263,24 +211,11 @@ const Projects = ({
     }
   };
 
-  // Удаление файла
   const handleDeleteFile = async (fileId) => {
     setIsLoading(true);
     try {
       const project = projects.find((p) => p.id === Number(selectedProject));
-      const formData = new FormData();
-      formData.append('user', user); 
-      formData.append('project', project.name);
-      formData.append('file', Number(fileId));
-      const response = await fetch("/file/delete",{
-        method: "POST",
-        headers: {
-          'Authorization': 'Bearer ' + token
-        },
-        body: formData,
-      });
-      if (!response.ok) throw new Error("Не удалось удалить файлы");
-      // Удаляем файл из локального состояния
+      await deleteFile(user, project.name, Number(fileId), token);
       setProjectFiles(projectFiles.filter((file) => file.id !== fileId));
     } catch (error) {
       console.error('Ошибка при удалении файла:', error);
@@ -294,7 +229,6 @@ const Projects = ({
     <div className="projects-overlay">
       <div className="projects-modal">
         <h2>Проекты</h2>
-        {/* Поле для ввода нового проекта + кнопка "создать" */}
         <div>
           <input
             type="text"
@@ -305,7 +239,6 @@ const Projects = ({
           <button type='submit' onClick={handleCreateProject}>Создать новый проект</button>
         </div>
 
-        {/* Dropdown проектов */}
         <div>
           <select
             className='select-input'
@@ -320,7 +253,6 @@ const Projects = ({
               </option>
             ))}
           </select>
-          {/* Кнопка Удалить проект (появляется при выборе проекта) */}
           {selectedProject && (
             <div>
               <button onClick={handleDeleteProject}>
@@ -330,7 +262,6 @@ const Projects = ({
           )}
         </div>
 
-        {/* Список файлов (кнопками) при выборе проекта */}
         {selectedProject && projectFiles.length > 0 && (
           <div>
             <h3>Файлы проекта:</h3>
@@ -353,7 +284,6 @@ const Projects = ({
           </div>
         )}
 
-        {/* Поля для указания имен файлов при сохранении code и representation */}
         {selectedProject && (
           <div>
             <h3>Сохранить code и representation в проект</h3>

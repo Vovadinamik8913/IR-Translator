@@ -4,6 +4,8 @@ import Selector from './Selector';
 import '../styles/Code.css';
 import {handleRepresentationMount} from './MonacoMount'
 import FontSize from './FontSize';
+import { getRepresentationExtension, getRepresentationsLanguages } from '../api/lang-api';
+import { translate } from '../api/translate-api';
 
 const Representation = ({
   code,
@@ -29,15 +31,8 @@ const Representation = ({
   useEffect(() => {
     const getRepresentations = async () => {
       try {
-        const buildFormData = new FormData();
-        buildFormData.append('compiler', compiler);
-        const response = await fetch('/lang/representation', {
-          method: 'POST',
-          body: buildFormData,
-        });
-        const data = await response.json();
+        const data = await getRepresentationsLanguages(compiler);
         setRepresentations(data);
-        //setRepresentation('');
         if (data.length > 0) {
           setSelectedRepresentation(data[0]);
         }
@@ -52,20 +47,9 @@ const Representation = ({
   useEffect(() => {
     if (selectedRepresentation) {
       const fetchReprExtension = async () => {
-        const buildFormData = new FormData();
-        buildFormData.append('lang', selectedRepresentation);
-
         try {
-          const response = await fetch('/lang/repr-extension', {
-            method: 'POST',
-            body: buildFormData,
-          });
-          const data = await response.text();
-          if (data) {
-            setReprExtension(data);
-          } else {
-            setReprExtension('.txt');
-          }
+          const data = await getRepresentationExtension(selectedRepresentation);
+          setReprExtension(data);
         } catch (error) {
           console.error('Ошибка при получении расширения файла:', error);
           setReprExtension('.txt');
@@ -81,26 +65,21 @@ const Representation = ({
       setRepresentation('');
   };
 
-   // Функция для удаления определенных строк
   const formatContent = (content) => {
-    // Разбиваем содержимое на строки
     const lines = content.split('\n');
     console.log(lines);
 
-    // Шаблоны для удаления
     const patternsToRemove = [
       /^;.*/,
       /^#.*/,
       /^\..*/,
-      /^!.*/,                    // Удалить строки, начинающиеся с '!' и содержат '='
-      /^source_filename.*/,         // Удалить строку с 'source_filename = '
-      /^target .*/,                    // Удалить строки с 'target datalayout' и 'target triple'
-      /^\.Lfunc_end.*/             // Удалить строки с '.Lfunc_end'
+      /^!.*/,                    
+      /^source_filename.*/,         
+      /^target .*/,                    
+      /^\.Lfunc_end.*/             
     ];
 
-    // Фильтруем строки
     var filteredLines = lines.filter((line) => {
-      // Проверяем, соответствует ли линия какому-либо шаблону
       for (const pattern of patternsToRemove) {
         if (pattern.test(line.trim())) {
           return false;
@@ -128,7 +107,6 @@ const Representation = ({
   
   const handleProcessCode = async () => {
       try {
-        // Шаг 1: Формируем файл из текста кода
         const fileExtension = codeExtention || '.txt';
         var fileName = 'code' + fileExtension;
         if(language === "java") {
@@ -137,32 +115,16 @@ const Representation = ({
         console.log(fileName);
         const codeFile = new File([code], fileName, { type: 'text/plain' });
   
-        // Шаг 2: Подготавливаем FormData
         const formData = new FormData();
-        formData.append('language', language); // Предполагается, что расширение соответствует языку
+        formData.append('language', language);
         formData.append('compiler', compiler);
         formData.append('representation', selectedRepresentation);
-        formData.append('flags', compilerFlags.split(" ")); // Если есть флаги компилятора
+        formData.append('flags', compilerFlags.split(" "));
         formData.append('code', codeFile);
-  
-        // Шаг 3: Отправляем запрос на сервер
-        const response = await fetch('/translate', {
-          method: 'POST',
-          body: formData,
-        });
-  
-        // Шаг 4: Обрабатываем ответ
-        if (response.ok) {
-          const blob = await response.blob();
-  
-          // Отображаем содержимое файла
-          const text = await blob.text();
-          const formatted = formatContent(text);
-          setRepresentation(formatted);
-        } else {
-          // Обработка ошибок
-          console.error('Ошибка при обработке кода на сервере');
-        }
+        
+        const text = await translate(formData);
+        const formatted = formatContent(text);
+        setRepresentation(formatted);
       } catch (error) {
         console.error('Ошибка при обработке кода:', error);
       }
@@ -186,8 +148,6 @@ const Representation = ({
   };
   
   const getJavaClassName = (code) => {
-    // Ищем первое вхождение слова "class"
-    // и захватываем слово (состоящее из букв, цифр и _) после него.
     const pattern = /class +([A-Za-z0-9_]+)/;
     const match = code.match(pattern);
     return match ? match[1] : null;
@@ -196,7 +156,6 @@ const Representation = ({
 
   return (
     <div className="window form">
-      {/* Выбор представления */}
       <div className="info">
         <div className="margin-right-15">
           <button className="button run" onClick={handleProcessCode}></button>
@@ -204,14 +163,12 @@ const Representation = ({
         <FontSize
           setFontSize={setFontSize}
         />
-        {/* Выбор компилятора */}
         <Selector
           src={compilers}
           elem={compiler}
           onChange={handleCompilerChange}
           text={"Compiler"}
         />
-        {/* Ввод ключей для компилятора */}
         <div className="flex-grow">
           <input
             id="compiler-flags"
@@ -227,7 +184,6 @@ const Representation = ({
           onChange={handleRepresentationChange}
           text={"Representation"}
         />
-        {/* Кнопки копирования и скачивания */}
         <div className="margin-right-15">
           <button className="button download" onClick={handleDownloadFile}></button>
         </div>

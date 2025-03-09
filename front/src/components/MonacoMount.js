@@ -1,10 +1,10 @@
 import '@monaco-editor/react';
-import { handleAsmMount } from './modes/asm-mode';
-import { handleJbcMount } from './modes/jbc-mode';
-import { handleLLVMIRMount } from './modes/llvm-ir-mode';
-import { handleDMount } from './modes/d-mode';
-import { handleCrystalMount } from './modes/crystal-mode';
-import { handleHaskellMount } from './modes/haskell-mode';
+import { handleAsmMount } from '../modes/asm-mode';
+import { handleJbcMount } from '../modes/jbc-mode';
+import { handleLLVMIRMount } from '../modes/llvm-ir-mode';
+import { handleDMount } from '../modes/d-mode';
+import { handleCrystalMount } from '../modes/crystal-mode';
+import { handleHaskellMount } from '../modes/haskell-mode';
 
 
 export const handleRepresentationMount = (monaco) => {
@@ -13,11 +13,9 @@ export const handleRepresentationMount = (monaco) => {
     handleLLVMIRMount(monaco);
 };
 
-
-  // Функция для определения пользовательской яркой темы
 const defineTheme = (monaco) => {
     monaco.editor.defineTheme('myCustomColorfulTheme', {
-      base: 'vs-dark', // Используем темную базовую тему
+      base: 'vs-dark',
       inherit: true,
       rules: [
         { token: 'comment', foreground: '6A9955', fontStyle: 'italic' },
@@ -30,12 +28,10 @@ const defineTheme = (monaco) => {
         { token: 'class', foreground: '4EC9B0' },
         { token: 'interface', foreground: '4EC9B0' },
         { token: 'function', foreground: 'DCDCAA' },
-        // Добавьте другие правила для нужных токенов
       ],
       colors: {
-        'editor.background': '#1E1E1E', // Цвет фона редактора
+        'editor.background': '#1E1E1E',
         'editor.foreground': '#D4D4D4',
-        // Добавьте другие цвета, если необходимо
       },
     });
 };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import logo from '../assets/logo.ico'; // Убедитесь, что путь к логотипу правильный
-import '../styles/Header.css'; // Импорт стилей
-import Login from './Login'; // Импортируем модальное окно
+import logo from '../assets/logo.ico';
+import '../styles/Header.css';
+import Login from './Login';
 import Projects from './Projects';
 
 const Header = ({
@@ -12,16 +12,14 @@ const Header = ({
     compiler, setCompiler,
     flags, setFlags
 }) => {
-    const [isModalOpen, setIsLoginModalOpen] = useState(false); // Состояние для управления открытием модального окна
+    const [isModalOpen, setIsLoginModalOpen] = useState(false);
     const [isProjectsModalOpen, setIsProjectsModalOpen] = useState(false);
     
-    // Открыть / закрыть модалку логина
-  const handleOpenLogin = () => setIsLoginModalOpen(true);
-  const handleCloseLogin = () => setIsLoginModalOpen(false);
+    const handleOpenLogin = () => setIsLoginModalOpen(true);
+    const handleCloseLogin = () => setIsLoginModalOpen(false);
 
-  // Открыть / закрыть модалку с проектами
-  const handleOpenProjects = () => setIsProjectsModalOpen(true);
-  const handleCloseProjects = () => setIsProjectsModalOpen(false);
+    const handleOpenProjects = () => setIsProjectsModalOpen(true);
+    const handleCloseProjects = () => setIsProjectsModalOpen(false);
 
     return (
         <header className="header">

@@ -4,6 +4,7 @@ import Editor from '@monaco-editor/react';
 import '../styles/Code.css';
 import {handleCodeMount} from './MonacoMount'
 import FontSize from './FontSize';
+import { getLanguageCompilers, getLanguageExtension, getLanguages } from '../api/lang-api';
 
 
 const CodeEditor = ({ 
@@ -18,69 +19,45 @@ const CodeEditor = ({
   const [languages, setLanguages] = useState([]);
   const [fontSize, setFontSize] = useState(14);
 
-  // Получаем список языков при загрузке компонента
   useEffect(() => {
-    fetch('/lang/languages', {
-      method: 'POST', // Изменили метод на POST
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({}), // Тело запроса можно оставить пустым или добавить необходимые данные
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    try {
+      const langPromise = getLanguages();
+      langPromise.then((data) => {
         setLanguages(data);
-        // Устанавливаем первый язык из списка как выбранный
         if (data.length > 0) {
           setLanguage(data[0]);
         }
-      })
-      .catch((error) => {
-        console.error('Ошибка при получении списка языков:', error);
       });
+    } catch (error) {
+        console.error('Ошибка при получении списка языков:', error);
+    }
   }, []);
 
   // Получаем список компиляторов при изменении языка
   useEffect(() => {
     if (language) {
-
-      const buildFormData = new FormData();
-      buildFormData.append("lang", language);
-
-      fetch('/lang/compilers', {
-        method: 'POST', // Изменили метод на POST
-        body: buildFormData // Передаем выбранный язык в теле запроса
-      })
-        .then((response)  => {
-          if (!response.ok) {
-            console.log("empty");
-          }
-          return response.json();
-        })
-        .then((data) => {
+      try {
+        const compilersPromise = getLanguageCompilers(language);
+        compilersPromise.then((data) => {
           setCompilers(data);
-        })
-        .catch((error) => {
-          console.error('Ошибка при получении списка компиляторов:', error);
         });
+      } catch (error) {
+        console.error('Ошибка при получении списка компиляторов:', error);
+      }
 
-        // Получаем расширение файла
-      fetch('/lang/code-extension', {
-        method: 'POST',
-        body: buildFormData
-      })
-        .then((response) => response.text())
-        .then((data) => {
+      try {
+        const extPromise = getLanguageExtension(language);
+        extPromise.then((data) => {
           if (data) {
             setFileExtension(data);
           } else {
             setFileExtension('.txt');
           }
-        })
-        .catch((error) => {
-          console.error('Ошибка при получении расширения файла:', error);
-          setFileExtension('.txt');
         });
+      } catch (error) {
+        console.error('Ошибка при получении расширения файла:', error);
+        setFileExtension('.txt');
+      }
     }
   }, [language]);
 
@@ -101,43 +78,37 @@ const CodeEditor = ({
     link.click();
   };
   
-  // Преобразуем languages в формат, подходящий для react-select
   const options = languages.map((lang) => ({
     value: lang,
     label: lang,
   }));
 
-  // Находим выбранную опцию
   const selectedOption = options.find((option) => option.value === language);
   
 
   return (
     <div className="window form">
-      {/* Хедер */}
       <div className="info">
         <FontSize
           setFontSize={setFontSize}
         />
-        {/* Выбор языка */}
         <Selector
           src={languages}
           elem={language}
           onChange={handleLanguageChange}
           text={"Language"}
         />
-        {/* Кнопки копирования и скачивания */}
         <div>
           <button className="button download" onClick={handleDownloadFile}></button>
         </div>
       </div>
-      {/* Редактор кода */}
       <div className="flex-grow">
         <Editor
           height="100%"
           language={language}
           value={code}
-          onChange={handleCodeChange} // Указываем нашу пользовательскую яркую тему
-          beforeMount={handleCodeMount} // Определяем тему перед монтированием редактора
+          onChange={handleCodeChange}
+          beforeMount={handleCodeMount}
           options={{ 
             selectOnLineNumbers: true,
             fontSize: fontSize
