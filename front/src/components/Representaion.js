@@ -1,92 +1,206 @@
-import React, { useState } from 'react';
-import SVGpart from './SVGpart';
-import hljs from 'highlight.js/lib/core';
-import 'highlight.js/styles/a11y-light.css';
+import React, { useState, useEffect } from 'react';
+import Editor from '@monaco-editor/react';
+import Selector from './Selector';
+import '../styles/Code.css';
+import {handleRepresentationMount} from './MonacoMount'
+import FontSize from './FontSize';
+import { getRepresentationExtension, getRepresentationsLanguages } from '../api/lang-api';
+import { translate } from '../api/translate-api';
 
-import llvm from 'highlight.js/lib/languages/llvm';
-import x86asm from 'highlight.js/lib/languages/x86asm';
-import java from 'highlight.js/lib/languages/java';
+const Representation = ({
+  code,
+  codeExtention,
+  language,
+  compilers,
+  compiler, setCompiler,
+  compilerFlags, setCompilerFlags,
+  representation, setRepresentation,
+  selectedRepresentation, setSelectedRepresentation
+}) => {
+  const [representations, setRepresentations] = useState([]);
+  const [reprExtension, setReprExtension] = useState('');
+  const [fontSize, setFontSize] = useState(14);
 
-hljs.registerLanguage('llvm', llvm);
-hljs.registerLanguage('x86asm', x86asm);
-hljs.registerLanguage('java', java);
 
+  useEffect(() => {
+    if(compilers.length > 0) {
+      setCompiler(compilers[0]);
+    }
+  }, [compilers])
 
-const Representation = ({ title, content, onLineClick }) => {
-  const [lineIndex, setLineIndex] = useState(null);
-  const [selectedRepresentation, setSelectedRepresentation] = useState('LLVM IR');
+  useEffect(() => {
+    const getRepresentations = async () => {
+      try {
+        const data = await getRepresentationsLanguages(compiler);
+        setRepresentations(data);
+        if (data.length > 0) {
+          setSelectedRepresentation(data[0]);
+        }
+      } catch (error) {
+        console.error('Ошибка при получении представлений:', error);
+      }
+    };
 
-  const handleRepresentationChange = (representation) => {
-    setSelectedRepresentation(representation);
+    getRepresentations();
+  }, [compiler]);
+
+  useEffect(() => {
+    if (selectedRepresentation) {
+      const fetchReprExtension = async () => {
+        try {
+          const data = await getRepresentationExtension(selectedRepresentation);
+          setReprExtension(data);
+        } catch (error) {
+          console.error('Ошибка при получении расширения файла:', error);
+          setReprExtension('.txt');
+        }
+      };
+
+      fetchReprExtension();
+    }
+  }, [selectedRepresentation]);
+
+  const handleRepresentationChange = (selectedOption) => {
+      setSelectedRepresentation(selectedOption.value);
+      setRepresentation('');
   };
 
-  const handleLineClick = (index) => {
-    console.log(`Нажата строка ${index + 1}`);
-    setLineIndex(index);
-    onLineClick(index);
+  const formatContent = (content) => {
+    const lines = content.split('\n');
+    console.log(lines);
+
+    const patternsToRemove = [
+      /^;.*/,
+      /^#.*/,
+      /^\..*/,
+      /^!.*/,                    
+      /^source_filename.*/,         
+      /^target .*/,                    
+      /^\.Lfunc_end.*/             
+    ];
+
+    var filteredLines = lines.filter((line) => {
+      for (const pattern of patternsToRemove) {
+        if (pattern.test(line.trim())) {
+          return false;
+        }
+      }
+      return true;
+    });
+    const lastIndex = filteredLines.length - 1 - filteredLines.slice().reverse().findIndex(line => line.trim() !== '');
+
+    filteredLines = filteredLines.filter((line, index) => {
+      if(index === 0 && line.trim() === '') {
+        return false;
+      }
+      if(index > lastIndex) {
+        return false;
+      }
+      return true;
+    })
+
+    // Удаляем лишние пустые строки
+    const formattedLines = filteredLines.join('\n').replace(/\n{2,}/g, '\n\n');
+
+    return formattedLines;
+  };
+  
+  const handleProcessCode = async () => {
+      try {
+        const fileExtension = codeExtention || '.txt';
+        var fileName = 'code' + fileExtension;
+        if(language === "java") {
+          fileName = getJavaClassName(code) + fileExtension;
+        }
+        console.log(fileName);
+        const codeFile = new File([code], fileName, { type: 'text/plain' });
+  
+        const formData = new FormData();
+        formData.append('language', language);
+        formData.append('compiler', compiler);
+        formData.append('representation', selectedRepresentation);
+        formData.append('flags', compilerFlags.split(" "));
+        formData.append('code', codeFile);
+        
+        const text = await translate(formData);
+        const formatted = formatContent(text);
+        setRepresentation(formatted);
+      } catch (error) {
+        console.error('Ошибка при обработке кода:', error);
+      }
   };
 
-  // Определяем язык для подсветки синтаксиса в зависимости от выбранного представления
-  let language;
-  switch (selectedRepresentation) {
-    case 'ASM':
-      language = 'x86asm';
-      break;
-    case 'JAVA BYTECODE':
-      language = 'java'; // Наиболее близкий вариант для байт-кода Java
-      break;
-    case 'LLVM IR':
-      language = 'llvm';
-      break;
-    default:
-      language = null;
+  const handleDownloadFile = () => {
+    const blob = new Blob([representation], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `repr${reprExtension}`;
+    link.click();
+  };
+
+  const handleCompilerChange = (selectedOption) => {
+    setCompiler(selectedOption.value);
+    setRepresentation('')
+  };
+
+  const handleCompilerFlagsChange = (event) => {
+    setCompilerFlags(event.target.value);
+  };
+  
+  const getJavaClassName = (code) => {
+    const pattern = /class +([A-Za-z0-9_]+)/;
+    const match = code.match(pattern);
+    return match ? match[1] : null;
   }
+  
 
   return (
     <div className="window form">
-      {/* Заголовок с выбором представления */}
       <div className="info">
-        <label htmlFor="representation-select">Выберите представление:</label>
-        <select
-          id="representation-select"
-          className="select-input"
-          value={selectedRepresentation}
-          onChange={(e) => handleRepresentationChange(e.target.value)}
-        >
-          <option value="ASM">ASM</option>
-          <option value="JAVA BYTECODE">JAVA BYTECODE</option>
-          <option value="LLVM IR">LLVM IR</option>
-          <option value="SVG">SVG</option>
-        </select>
+        <div className="margin-right-15">
+          <button className="button run" onClick={handleProcessCode}></button>
+        </div>
+        <FontSize
+          setFontSize={setFontSize}
+        />
+        <Selector
+          src={compilers}
+          elem={compiler}
+          onChange={handleCompilerChange}
+          text={"Compiler"}
+        />
+        <div className="flex-grow">
+          <input
+            id="compiler-flags"
+            type="text"
+            value={compilerFlags}
+            onChange={handleCompilerFlagsChange}
+            className="text-input"
+          />
+        </div>
+        <Selector
+          src={representations}
+          elem={selectedRepresentation}
+          onChange={handleRepresentationChange}
+          text={"Representation"}
+        />
+        <div className="margin-right-15">
+          <button className="button download" onClick={handleDownloadFile}></button>
+        </div>
       </div>
 
-      {/* Блок для отображения содержимого */}
-      {content ? (
-        selectedRepresentation === 'SVG' ? (
-          // Отображаем компонент для SVG
-          <SVGpart svgContent={content} />
-        ) : (
-          // Отображаем текст с подсветкой синтаксиса
-          <pre className="txt-win">
-            {content.split('\n').map((line, index) => {
-              // Подсвечиваем каждую строку отдельно
-              const highlightedLine = hljs.highlight(line, { language }).value;
-              return (
-                <div
-                  key={index}
-                  onClick={() => handleLineClick(index)}
-                  style={{ display: 'flex' }}
-                  dangerouslySetInnerHTML={{
-                    __html: <span class="line-number">${index + 1}</span>,
-                  }}
-                ></div>
-              );
-            })}
-          </pre>
-        )
-      ) : (
-        <p>Загрузите файл для отображения содержимого.</p>
-      )}
+
+      <Editor
+        height="100%"
+        theme="vs-dark"
+        language={selectedRepresentation}
+        value={representation}
+        options={{
+          fontSize: fontSize,
+          readOnly: true,
+        }}
+        beforeMount={handleRepresentationMount}
+      />
     </div>
   );
 };
