@@ -29,6 +29,7 @@ public class UserController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final LocalConfig localConfig;
 
     @Operation(summary = "Регистрация пользователя")
     @PostMapping(value = "/registration")
@@ -43,7 +44,7 @@ public class UserController {
             }
             User user = new User(login, password, email);
             userService.create(user);
-            String path = LocalConfig.getInstance().getWorkPath() + File.separator + user.getUuid();
+            String path = localConfig.getWorkPath() + File.separator + user.getUuid();
             File userDir = new File(path);
             if (!userDir.exists()) {
                 userDir.mkdirs();

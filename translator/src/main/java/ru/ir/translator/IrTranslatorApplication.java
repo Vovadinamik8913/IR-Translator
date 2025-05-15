@@ -9,13 +9,7 @@ import java.io.IOException;
 public class IrTranslatorApplication {
 
 	public static void main(String[] args) {
-
-        try {
-            LocalConfig.deserializeFromJson();
-			SpringApplication.run(IrTranslatorApplication.class, args);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+        SpringApplication.run(IrTranslatorApplication.class, args);
 	}
 
 }

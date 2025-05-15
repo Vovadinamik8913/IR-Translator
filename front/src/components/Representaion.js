@@ -192,7 +192,7 @@ const Representation = ({
 
       <Editor
         height="100%"
-        theme="vs-dark"
+        theme="vs"
         language={selectedRepresentation}
         value={representation}
         options={{

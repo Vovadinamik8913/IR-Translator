@@ -15,7 +15,7 @@ export const handleRepresentationMount = (monaco) => {
 
 const defineTheme = (monaco) => {
     monaco.editor.defineTheme('myCustomColorfulTheme', {
-      base: 'vs-dark',
+      base: 'vs',
       inherit: true,
       rules: [
         { token: 'comment', foreground: '6A9955', fontStyle: 'italic' },

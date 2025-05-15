@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: translator/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    volumes:
+      - /home/abrikosjr/Desktop/Project/work:/app/work
+      - ./translator/data:/app/data
+    environment:
+      WORK_PATH: "/app/work"
+      SPRING_DATASOURCE_URL: "jdbc:sqlite:/app/data/translator.db"
+      FRONT_PATH: "http://localhost:3000"
+
+  front:
+    build:
+      context: .
+      dockerfile: front/Dockerfile
+      args:
+        REACT_APP_BACKEND_URL: "http://localhost:8080"
+    ports:
+      - "3000:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

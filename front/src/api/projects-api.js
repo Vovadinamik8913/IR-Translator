@@ -1,7 +1,9 @@
+import config from '../config/config.js';
+
 export const getProjects = async (user, token) => {
     const formData = new FormData();
     formData.append('user', user); 
-    const response = await fetch("/project/get", {
+    const response = await fetch(`${config.api.baseUrl}/project/get`, {
       method: "POST",
       headers: {
         'Authorization': 'Bearer ' + token
@@ -18,7 +20,7 @@ export const createProject = async (user, project, token) => {
     const formData = new FormData();
     formData.append('user', user);
     formData.append('project', project);
-    const response = await fetch("/project/create", {
+    const response = await fetch(`${config.api.baseUrl}/project/create`, {
       method: "POST",
       headers: {
         'Authorization': 'Bearer ' + token
@@ -35,7 +37,7 @@ export const selectProject = async (user, project, token) => {
     const formData = new FormData();
     formData.append('user', user);
     formData.append('project', project);
-    const response = await fetch("/file/get",{
+    const response = await fetch(`${config.api.baseUrl}/file/get`,{
       method: "POST",
       headers: {
         'Authorization': 'Bearer ' + token
@@ -52,7 +54,7 @@ export const getFiles = async (user, project, fileId, token) => {
     formData.append('user', user); 
     formData.append('project', project);
     formData.append('file', fileId);
-    const response = await fetch("/file/load",{
+    const response = await fetch(`${config.api.baseUrl}/file/load`,{
       method: "POST",
       headers: {
         'Authorization': 'Bearer ' + token
@@ -70,7 +72,7 @@ export const getFiles = async (user, project, fileId, token) => {
 };
 
 export const saveFiles = async (formData, token) => {
-    const response = await fetch("/file/save", {
+    const response = await fetch(`${config.api.baseUrl}/file/save`, {
       method: "POST",
       headers: {
         'Authorization': 'Bearer ' + token
@@ -85,7 +87,7 @@ export const deleteProject = async (user, project, token) => {
     const formData = new FormData();
     formData.append('user', user); 
     formData.append('project', project);
-    const response = await fetch("/project/delete",{
+    const response = await fetch(`${config.api.baseUrl}/project/delete`,{
       method: "POST",
       headers: {
         'Authorization': 'Bearer ' + token
@@ -101,7 +103,7 @@ export const deleteFile = async (user, project, fileId, token) => {
     formData.append('user', user); 
     formData.append('project', project);
     formData.append('file', fileId);
-    const response = await fetch("/file/delete",{
+    const response = await fetch(`${config.api.baseUrl}/file/delete`,{
       method: "POST",
       headers: {
         'Authorization': 'Bearer ' + token

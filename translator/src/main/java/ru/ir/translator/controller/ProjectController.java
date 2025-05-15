@@ -28,6 +28,7 @@ public class ProjectController {
     private final ProjectService projectService;
     private final UserService userService;
     private final FileService fileService;
+    private final LocalConfig localConfig;
 
     @Operation(summary = "создание нового проекта")
     @PostMapping("/create")
@@ -49,7 +50,7 @@ public class ProjectController {
         if (project == null) {
             return ResponseEntity.ofNullable(null);
         }
-        String path = LocalConfig.getInstance().getWorkPath()
+        String path = localConfig.getWorkPath()
                 + File.separator + user.getUuid()
                 + File.separator + projectName;
         File projectDir = new File(path);
@@ -96,7 +97,7 @@ public class ProjectController {
 
         projectService.deleteProject(project);
 
-        String path = LocalConfig.getInstance().getWorkPath()
+        String path = localConfig.getWorkPath()
                 + File.separator + user.getUuid()
                 + File.separator + projectName;
         File dir = new File(path);

@@ -1,5 +1,7 @@
+import config from '../config/config.js';
+
 export const getLanguages = async () => {
-    const response = await fetch('/lang/languages', {
+    const response = await fetch(`${config.api.baseUrl}/lang/languages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -14,7 +16,7 @@ export const getLanguages = async () => {
 export const getLanguageExtension = async (language) => {
     const buildFormData = new FormData();
     buildFormData.append("lang", language);
-    const response = await fetch('/lang/code-extension', {
+    const response = await fetch(`${config.api.baseUrl}/lang/code-extension`, {
         method: 'POST',
         body: buildFormData
     });
@@ -26,7 +28,7 @@ export const getLanguageExtension = async (language) => {
 export const getLanguageCompilers = async (language) => {
     const buildFormData = new FormData();
     buildFormData.append("lang", language);
-    const response = await fetch('/lang/compilers', {
+    const response = await fetch(`${config.api.baseUrl}/lang/compilers`, {
         method: 'POST',
         body: buildFormData
       });
@@ -38,7 +40,7 @@ export const getLanguageCompilers = async (language) => {
 export const getRepresentationsLanguages = async (compiler) => {
     const buildFormData = new FormData();
     buildFormData.append('compiler', compiler);
-    const response = await fetch('/lang/representation', {
+    const response = await fetch(`${config.api.baseUrl}/lang/representation`, {
       method: 'POST',
       body: buildFormData,
     });
@@ -51,7 +53,7 @@ export const getRepresentationsLanguages = async (compiler) => {
 export const getRepresentationExtension = async (selectedRepresentation) => {
     const buildFormData = new FormData();
     buildFormData.append('lang', selectedRepresentation);
-    const response = await fetch('/lang/repr-extension', {
+    const response = await fetch(`${config.api.baseUrl}/lang/repr-extension`, {
       method: 'POST',
       body: buildFormData,
     });

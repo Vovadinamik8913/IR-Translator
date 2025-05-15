@@ -42,6 +42,7 @@ public class FileController {
     private final ProjectService projectService;
     private final LangService langService;
     private final FileService fileService;
+    private final LocalConfig localConfig;
 
     private void create(InputStream stream, String path) throws IOException {
         File file = new File(path);
@@ -98,7 +99,7 @@ public class FileController {
             return ResponseEntity.notFound().build();
         }
 
-        String path = LocalConfig.getInstance().getWorkPath()
+        String path = localConfig.getWorkPath()
                 + File.separator + user.getUuid()
                 + File.separator + projectName;
 

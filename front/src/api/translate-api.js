@@ -1,5 +1,7 @@
+import config from '../config/config.js';
+
 export const translate = async (formData) => {
-    const response = await fetch('/translate', {
+    const response = await fetch(`${config.api.baseUrl}/translate`, {
       method: 'POST',
       body: formData,
     });

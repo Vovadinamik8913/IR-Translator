@@ -1,0 +1,25 @@
+app:
+  work-path: ${WORK_PATH}
+  front-path: ${FRONT_PATH}
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: IRTranslator
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: true
+
+token:
+  signing:
+    key: 12425215452539859238598239812491209419249120491204901294-0192409129490
+jwt:
+  expiration: 900000
