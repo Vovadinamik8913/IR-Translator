@@ -1,0 +1,59 @@
+package ru.ir.translator.model;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.Getter;
+import ru.ir.translator.model.files.Code;
+import ru.ir.translator.model.files.Representation;
+
+import java.util.List;
+
+@Entity
+@Getter
+public class Project {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    @Column(nullable = false)
+    private String name;
+    @ManyToOne @JoinColumn(name = "user_id")
+    @JsonBackReference
+    private User user;
+    @OneToMany(mappedBy = "project")
+    @JsonIgnore
+    private List<Code> code;
+    @OneToMany(mappedBy = "project")
+    @JsonIgnore
+    private List<Representation> representation;
+
+    public Project() {}
+    public Project(String name, User user) {
+        this.name = name;
+        this.user = user;
+    }
+
+    public void addCode(Code code) {
+        if (this.code != null) {
+            this.code.add(code);
+        }
+    }
+
+    public void removeCode(Code code) {
+        if (this.code != null) {
+            this.code.remove(code);
+        }
+    }
+
+    public void addRepresentation(Representation representation) {
+        if (this.representation != null) {
+            this.representation.add(representation);
+        }
+    }
+
+    public void removeRepresentation(Representation representation) {
+        if (this.representation != null) {
+            this.representation.remove(representation);
+        }
+    }
+}

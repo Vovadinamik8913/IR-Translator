@@ -1,0 +1,23 @@
+.font-overlay {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 4px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+    overflow-y: auto;
+    height: 250px;
+}
+
+.font {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}

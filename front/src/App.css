@@ -1,0 +1,71 @@
+.App {
+    text-align: center;
+}
+
+.header {
+    position: relative;
+    background-color: #282c34;
+    padding: 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ccc;
+}
+
+.main-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.window {
+    border: 2px solid #228B22;
+    border-radius: 5px;
+    background-color: snow;
+}
+
+.button{
+    width: 30px;
+    height: 30px;
+    background-color: #2D2D2D;
+    border: none;
+}
+
+.button.download{
+    background-color: #2D2D2D;
+    background-image: url('/src/assets/download.png');
+    background-size: cover;
+}
+
+.button.run{
+    background-color: #2D2D2D;
+    width: 60px;
+    background-image: url('/src/assets/run.png');
+    background-size: cover;
+    background-position-y: center;
+}
+
+.button.project{
+    background-color: #2D2D2D;
+    background-image: url('/src/assets/menu.png');
+    background-size: cover;
+}
+.button.font{
+    background-color: #2D2D2D;
+    background-image: url('/src/assets/font.png');
+    background-size: cover;
+}
+
+.header.font{
+    padding: 0px;  
+    display: flex;
+    align-items: center;
+    background-color: #2D2D2D;
+    color: #fff;
+}
+
+
+button:hover {
+    opacity: 0.8;
+    background: #bababa;
+}
